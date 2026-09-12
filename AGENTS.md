@@ -1,45 +1,41 @@
 # Instructions for Future Coding Agents
 
-## Project goal
+## Part 1 goal
 
-Build a small local hotel-booking application in Part 2. It is inspired by Expedia at a high level, but must use only synthetic data and must never rely on private Expedia information.
-
-## Scope rules
-
-- Support only hotel browsing, booking, confirmation, booking history, and booking details.
-- Do not add real payments, authentication, real booking/travel APIs, or real personal/travel data.
-- Keep the application local and appropriate for a small course project.
-- Do not represent planned behavior as implemented behavior.
+Maintain a small local hotel and available-stay search using Vue, Python, FastAPI, and the instructor-supplied CSV files. This is a Part 1 search implementation, not a booking system.
 
 ## Architecture
 
-- Frontend: static HTML, CSS, and browser JavaScript in `frontend/`.
-- Backend: Python Flask service in `backend/`.
-- Communication: JSON over HTTP with browser `fetch()`.
-- Persistence: `data/bookings.json` is the durable local booking store.
-- Planned endpoints: `GET /api/hotels`, `POST /api/bookings`, `GET /api/bookings`, and `GET /api/bookings/<id>`.
+- **Frontend:** Vue 3 + Vite in `frontend/`.
+- **Backend:** Python FastAPI in `backend/main.py`.
+- **Communication:** Vue uses `fetch()` to call `GET /api/search?hotel_name=<name>` over local HTTP.
+- **Data:** `data/hotels.csv` and `data/trips.csv` are the required sources.
+- **Join:** the backend joins hotel and trip rows through `hotel_id` before returning JSON.
+
+## Scope rules
+
+- Keep the search interface plain: input, Search button, clear table labels, and a no-results message.
+- Do not hard-code hotel or trip results in the Vue source; all search results must come from FastAPI.
+- Do not alter instructor CSV values or replace them with invented records.
+- Do not add SQLite, CRUD, booking creation, authentication, payment handling, or external APIs until explicitly authorized for Part 2.
+- Use the Expedia screenshots only as observable visual references; never copy proprietary code or claim an exact reproduction.
 
 ## Responsibilities
 
-- **Frontend:** render synthetic hotels, collect booking data, call the API, show confirmations/history/details, and make API failures understandable.
-- **Backend:** provide synthetic hotels; validate booking requests; calculate totals; generate IDs and simulated confirmation numbers; save, list, and retrieve bookings.
-- **Persistence:** preserve the JSON-array format, handle a new empty file safely, and keep stored booking records aligned with the documented data model.
+- **Vue frontend:** collect the hotel-name query, call FastAPI, display matching hotels and available stays, and show loading, error, and no-results states.
+- **FastAPI backend:** read both CSV files, validate required CSV headers, join data with `hotel_id`, filter by hotel name, and return JSON.
+- **CSV data:** preserve `hotels.csv` and `trips.csv` as supplied. The backend must handle the UTF-8 BOM using `utf-8-sig`.
 
-## Review requirements
+## Verification and documentation
 
-- Check validation failures, empty history, unknown booking IDs, unavailable-backend behavior, and successful paths.
-- Verify saved bookings remain after browser and backend restarts.
-- Review the JSON content for valid structure after creating bookings.
-- Update documentation and the handoff note to distinguish implemented, checked, and unimplemented work truthfully.
+- Manually inspect changed files in VS Code.
+- Test a successful browser search and a no-results browser search.
+- Record the expected and observed result for both tests in `docs/evidence-log.md`.
+- Take the required screenshots listed in the evidence log.
+- Keep `README.md`, `docs/design.md`, `handoffs/current.md`, `report.md`, and prompts accurate about implemented versus unimplemented work.
 
 ## Git expectations
 
-- Inspect the working tree before editing; preserve unrelated user changes.
-- Make focused, reviewable changes and do not commit unless explicitly asked.
-- Do not use destructive Git commands without explicit authorization.
-
-## Constraints
-
-- Use synthetic identities and travel data only.
-- No real payments, authentication, booking APIs, or private Expedia information.
-- Do not claim that code, endpoints, tests, or browser behavior exist unless they actually do and have been checked.
+- Inspect the working tree before editing and preserve user changes.
+- Do not commit or push unless explicitly asked.
+- Keep changes focused and do not use destructive Git commands without authorization.

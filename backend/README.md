@@ -1,8 +1,7 @@
-# Backend placeholder
+# FastAPI backend
 
-This directory is a Part 1 placeholder. Part 2 will add:
+This Part 1 backend provides `GET /api/search?hotel_name=<name>`.
 
-- `app.py` for the Flask application and API routes
-- `requirements.txt` for Python dependencies
+`main.py` reads `data/hotels.csv` and `data/trips.csv`, joins the records on `hotel_id`, and returns matching hotels with their available stays as JSON. `requirements.txt` lists the FastAPI and Uvicorn dependencies.
 
-No Flask implementation or API endpoints exist yet.
+No SQLite CRUD, booking creation, authentication, payment handling, or external API integration is included.

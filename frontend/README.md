@@ -1,9 +1,10 @@
-# Frontend starter prototype
+# Vue frontend
 
-This directory now contains a small Part 1 classroom-style hotel-search prototype:
+This Part 1 Vue/Vite frontend calls the local FastAPI search endpoint and renders matching hotels with their available stays in a plain table.
 
-- `index.html` provides the search form, result count, and hotel table.
-- `styles.css` provides intentionally simple form and table styling.
-- `app.js` contains three synthetic hotel records and filters them by hotel name in the browser.
+- `src/App.vue` contains the search interface and no-results message.
+- `src/main.js` starts the Vue application.
+- `src/style.css` provides intentionally simple form and table styling.
+- `package.json` defines the Vue/Vite development commands.
 
-The prototype does not use `fetch()`, Flask, external APIs, persistence, booking forms, booking confirmation, or booking history. Those features remain planned for Part 2.
+The frontend does not contain hotel result data. FastAPI reads the instructor-supplied CSV files and returns matching records. No SQLite CRUD, booking, authentication, payment, or external API integration is included.

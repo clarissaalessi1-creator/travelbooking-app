@@ -2,16 +2,16 @@
 
 ## What currently exists
 
-The Part 1 repository scaffold exists: root documentation and agent guidance, an empty JSON booking store, detailed design and evidence documents, and Part 1/Part 2 prompts. Expedia reference screenshots are present in `docs/reference-images/` as observable visual references. A small standalone frontend prototype exists in `frontend/`: it displays three synthetic hotels and filters them by hotel name. No Flask backend source code has been added.
+Part 1 now contains a Vue/Vite frontend in `frontend/` and a Python FastAPI backend in `backend/`. The backend reads the instructor-supplied `data/hotels.csv` and `data/trips.csv`, joins records by `hotel_id`, and exposes a hotel-name search endpoint. The frontend requests that endpoint and renders matching hotels with available stays in a plain table or a no-results message.
 
 ## What has been checked
 
-The requested Part 1 file structure was reviewed, and `data/bookings.json` was confirmed to contain valid JSON with an empty array. Documentation was reviewed to ensure it describes the current setup and starter-prototype state. The frontend script passed a syntax check and source-level filtering checks for all, one, and zero results. No browser, Flask API, persistence behavior, or end-to-end booking flow has been tested.
+The actual CSV headers and contents were inspected. Source files were checked to confirm that the frontend has no hard-coded hotel results and that FastAPI reads both CSV files. Temporary automated checks passed: the FastAPI endpoint returned `H001` joined to `T001`/`T009`, and the Vue/Vite frontend built successfully. Project-local dependency installation and browser verification have not been performed, so the evidence log retains pending observed-result fields for the required manual tests.
 
 ## What is incomplete
 
-The starter hotel search is complete only as static browser code. All booking-related work remains: the Flask app and dependencies; synthetic hotel API; API integration; booking validation, calculations, IDs, and confirmation numbers; JSON read/write persistence; booking/confirmation/history/detail screens; and behavior testing.
+The student still needs to install dependencies, inspect the changed files in VS Code, run a successful browser search and a no-results browser search, record observed results, and take the required screenshots. SQLite CRUD, bookings, authentication, payments, and external APIs are intentionally not implemented.
 
-## Next concrete implementation task
+## Next concrete task
 
-Begin Part 2 by building the Flask backend in `backend/`: create `app.py` and `requirements.txt`, implement the four planned API endpoints, and add safe JSON-file persistence to `data/bookings.json` according to `docs/design.md`.
+Run the FastAPI backend and Vue frontend, then complete the two manual tests recorded in `docs/evidence-log.md`. Do not start Part 2 SQLite CRUD without explicit authorization.

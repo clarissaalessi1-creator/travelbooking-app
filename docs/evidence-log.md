@@ -2,14 +2,23 @@
 
 | Major instruction/decision | Resulting change | Manual review/check | Decision | Remaining limitation |
 | --- | --- | --- | --- | --- |
-| Set up, do not fully implement | Initially created the requested folders, documentation, placeholder readmes, ignore file, and JSON store; a later Part 1 change added the basic static search prototype. | Review the file tree to confirm the static frontend exists and no Flask backend source files exist. | Keep booking implementation deferred to Part 2. | No runnable booking application exists. |
-| Use HTML/CSS/JavaScript and Flask | Documented the planned division between browser frontend and Flask API; the browser-only search prototype uses HTML/CSS/JavaScript. | Read `README.md` and `docs/design.md` for consistent architecture. | Use Flask for the API in Part 2. | The Flask backend is not implemented. |
-| Use HTTP JSON communication | Documented `fetch()` and the four planned API endpoints. | Verify endpoint names are identical across planning files. | Keep API design REST-style and small. | Requests/responses have not been exercised. |
-| Persist to local JSON | Initialized `data/bookings.json` to an empty array and documented on-disk persistence. | Confirm the file contains valid `[]`. | Use the JSON file rather than a database for course-project scope. | No read/write code yet; restart persistence is not tested. |
-| Define booking flows and failures | Recorded both flows, Mermaid diagrams, responsible layers, empty states, and failure states. | Read `docs/design.md`; verify listed required failures are present. | Treat validation and error handling as backend/frontend responsibilities in Part 2. | Behaviors are design commitments only. |
-| Provide future-agent guidance | Added `AGENTS.md`, Part 2 backend prompt, and handoff note. | Review that all instructions preserve synthetic-only, no-payment, no-auth constraints. | Keep future work narrowly scoped. | Guidance does not replace implementation review. |
-| Add a starter hotel search | Created a basic static frontend with three synthetic hotel records, a hotel-name search field, result count, and simple table. | `frontend/app.js` passed a syntax check and source-level checks for all, one, and zero matching results. | Keep this browser-only prototype intentionally separate from the planned backend and booking flows. | No browser test has been recorded; no API, booking, or persistence behavior exists. |
+| Use Vue + FastAPI | Added Vue/Vite frontend files and FastAPI backend files in separate folders. | A temporary Vue/Vite production build passed; inspect `frontend/` and `backend/` in VS Code. | Keep browser UI and API separated. | Project-local dependency installation and browser testing remain pending. |
+| Use instructor CSV files | Backend reads `data/hotels.csv` and `data/trips.csv` with UTF-8 BOM support. | Inspect the actual headers and values in both CSV files. | Do not hard-code result data in Vue. | CSV data is read at request time; no database is used. |
+| Join hotels and stays | Backend groups trips by `hotel_id` and returns `available_stays` for each matching hotel. | Automated FastAPI HTTP check passed: `H001` returned `T001` and `T009`; inspect `backend/main.py` and run the successful browser search. | Use `hotel_id` as the only join key. | No SQLite schema or CRUD exists. |
+| Successful browser search | Search for `Harbor Lantern Hotel`. | Expected: one hotel, `H001`, with *Boston Harbor Weekend* and *Boston Autumn Weekend*. Observed: **Pending your manual browser test.** | Record the observed result after testing. | Must be performed with both local services running. |
+| No-results browser search | Search for `Moonlight Palace Hotel`. | Expected: `No hotels and available stays found for “Moonlight Palace Hotel”.` Observed: **Pending your manual browser test.** | Record the observed result after testing. | Must be performed with both local services running. |
+| Preserve Part 2 boundary | Excluded SQLite CRUD, booking, authentication, payment, and external APIs. | Confirm no database files or CRUD routes were added. | Keep Part 2 out of this checkpoint. | Future work requires explicit authorization. |
+
+## Screenshot checklist
+
+After the two manual browser tests, capture:
+
+1. The successful `Harbor Lantern Hotel` search showing the search term, table headings, `H001`, and both available stays.
+2. The `Moonlight Palace Hotel` no-results search showing the search term and clear no-results message.
+3. Optional but useful: VS Code showing `frontend/src/App.vue`, `backend/main.py`, and the two CSV files in the Explorer.
+
+Store any new submission screenshots only if your assignment requires them; do not overwrite the existing Expedia reference images.
 
 ## AI assistance disclosure
 
-AI assisted with converting the supplied assignment requirements into the repository structure, planning documents, prompts, future-agent guidance, and the basic static search prototype. The frontend script received syntax and source-level filtering checks, but no browser testing or end-to-end frontend/backend execution has occurred. The student should manually review all files and is responsible for the final submission.
+AI assisted with planning, documentation, and implementation under student direction. Manual VS Code inspection and browser testing remain the student's responsibility, and no manual browser result is claimed until the observed-result fields above are completed.
