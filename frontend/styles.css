@@ -1,0 +1,23 @@
+body {
+  margin: 24px;
+  background: #ffffff;
+  color: #000000;
+  font-family: Arial, sans-serif;
+}
+
+label,
+input,
+button {
+  margin-right: 8px;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid #000000;
+  padding: 8px;
+  text-align: left;
+}

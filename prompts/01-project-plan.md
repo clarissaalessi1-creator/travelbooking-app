@@ -1,0 +1,3 @@
+# Part 1 Project Plan Prompt
+
+Design and set up, but do not fully implement, a small local hotel-booking application inspired at a high level by Expedia. Use HTML/CSS/JavaScript for a future frontend, Python Flask for a future backend, JSON over HTTP, and `data/bookings.json` for persistence. Document two future flows: make a booking and review booking history/details. Create the repository scaffold, design/evidence/handoff documents, placeholder frontend/backend readmes, JSON store initialized to `[]`, `.gitignore`, future-agent instructions, and a Part 2 backend implementation prompt. Use only synthetic data; exclude real payments, authentication, real booking APIs, and private Expedia information. Clearly distinguish planned work from implemented setup.

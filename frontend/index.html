@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hotel search</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <h1>Hotel search</h1>
+
+      <form id="hotel-search-form">
+        <label for="hotel-name">Hotel name</label>
+        <input id="hotel-name" name="hotelName" type="text">
+        <button type="submit">Search</button>
+      </form>
+
+      <p id="result-count" aria-live="polite"></p>
+
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Hotel ID</th>
+            <th scope="col">Hotel name</th>
+            <th scope="col">City</th>
+            <th scope="col">Stars</th>
+            <th scope="col">Nightly rate</th>
+          </tr>
+        </thead>
+        <tbody id="hotel-results"></tbody>
+      </table>
+    </main>
+  </body>
+</html>
