@@ -2,16 +2,16 @@
 
 ## What currently exists
 
-Part 1 now contains a Vue/Vite frontend in `frontend/` and a Python FastAPI backend in `backend/`. The backend reads the instructor-supplied `data/hotels.csv` and `data/trips.csv`, joins records by `hotel_id`, and exposes a hotel-name search endpoint. The frontend requests that endpoint and renders matching hotels with available stays in a plain table or a no-results message.
+The repository contains a Vue/Vite search and booking interface backed by FastAPI and SQLite. The backend creates the SQLite schema at startup and seeds it once from the four instructor CSV files. Vue fetches users, search results, and booking history from FastAPI; it creates bookings, cancels them while retaining their rows, and deletes only application-created test bookings. The six instructor bookings are protected, and SQLite never reuses an issued booking ID.
 
 ## What has been checked
 
-The actual CSV headers and contents were inspected. Source files were checked to confirm that the frontend has no hard-coded hotel results and that FastAPI reads both CSV files. Temporary automated checks passed: the FastAPI endpoint returned `H001` joined to `T001`/`T009`, and the Vue/Vite frontend built successfully. Project-local dependency installation and browser verification have not been performed, so the evidence log retains pending observed-result fields for the required manual tests.
+All four CSV files were inspected and validated. Automated checks confirmed 8 hotels, 12 trips, 6 users, and 6 bookings after initial setup and after a real FastAPI restart; SQLite foreign-key validation passed. Browser tests selected `U006`, created and cancelled `B007`, deleted it, then created `B008` to confirm the persistent ID state did not reuse `B007`. Both test bookings were deleted and remained absent after restarting both services; `B001`–`B006` remained intact. The test-delete UI is hidden for seeded bookings, and the backend rejects deletion of `B001` with `403`. Browser tests also passed for both the successful and no-results Part 1 searches.
 
 ## What is incomplete
 
-The student still needs to install dependencies, inspect the changed files in VS Code, run a successful browser search and a no-results browser search, record observed results, and take the required screenshots. SQLite CRUD, bookings, authentication, payments, and external APIs are intentionally not implemented.
+The student still needs to inspect the changed files in VS Code and take any screenshots required by the assignment. Authentication, payments, and external APIs are not implemented.
 
 ## Next concrete task
 
-Run the FastAPI backend and Vue frontend, then complete the two manual tests recorded in `docs/evidence-log.md`. Do not start Part 2 SQLite CRUD without explicit authorization.
+Perform final student review and submission preparation; do not add unrelated features.

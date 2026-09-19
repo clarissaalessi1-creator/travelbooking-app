@@ -5,14 +5,34 @@ body {
   font-family: Arial, sans-serif;
 }
 
+main {
+  max-width: 1400px;
+}
+
+section {
+  margin-top: 32px;
+}
+
+h1,
+h2 {
+  margin-bottom: 12px;
+}
+
 label,
 input,
+select,
 button {
   margin-right: 8px;
 }
 
+.table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 table {
   border-collapse: collapse;
+  margin-top: 12px;
 }
 
 th,

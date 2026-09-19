@@ -1,10 +1,10 @@
 # Vue frontend
 
-This Part 1 Vue/Vite frontend calls the local FastAPI search endpoint and renders matching hotels with their available stays in a plain table.
+This Vue/Vite interface preserves the hotel search and adds the Part 2 booking workflow. It fetches all displayed travelers, search results, and booking history from FastAPI; the backend serves the data from SQLite.
 
-- `src/App.vue` contains the search interface and no-results message.
+- `src/App.vue` contains the traveler selector, hotel search, trip Book buttons, booking history, cancellation, and test-deletion controls.
 - `src/main.js` starts the Vue application.
 - `src/style.css` provides intentionally simple form and table styling.
 - `package.json` defines the Vue/Vite development commands.
 
-The frontend does not contain hotel result data. FastAPI reads the instructor-supplied CSV files and returns matching records. No SQLite CRUD, booking, authentication, payment, or external API integration is included.
+The frontend does not hard-code hotel, trip, traveler, or booking records. Booking state is refreshed from FastAPI after each create, cancel, or delete action and again when the browser reloads. Delete (test) is displayed only for application-created bookings; the six instructor bookings are protected by the backend. Authentication, payments, and external API integration are not included.

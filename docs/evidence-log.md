@@ -1,13 +1,15 @@
-# Part 1 Evidence Log
+# Part 1 search and Part 2 foundation evidence log
 
 | Major instruction/decision | Resulting change | Manual review/check | Decision | Remaining limitation |
 | --- | --- | --- | --- | --- |
-| Use Vue + FastAPI | Added Vue/Vite frontend files and FastAPI backend files in separate folders. | A temporary Vue/Vite production build passed; inspect `frontend/` and `backend/` in VS Code. | Keep browser UI and API separated. | Project-local dependency installation and browser testing remain pending. |
-| Use instructor CSV files | Backend reads `data/hotels.csv` and `data/trips.csv` with UTF-8 BOM support. | Inspect the actual headers and values in both CSV files. | Do not hard-code result data in Vue. | CSV data is read at request time; no database is used. |
-| Join hotels and stays | Backend groups trips by `hotel_id` and returns `available_stays` for each matching hotel. | Automated FastAPI HTTP check passed: `H001` returned `T001` and `T009`; inspect `backend/main.py` and run the successful browser search. | Use `hotel_id` as the only join key. | No SQLite schema or CRUD exists. |
-| Successful browser search | Search for `Harbor Lantern Hotel`. | Expected: one hotel, `H001`, with *Boston Harbor Weekend* and *Boston Autumn Weekend*. Observed: **Pending your manual browser test.** | Record the observed result after testing. | Must be performed with both local services running. |
-| No-results browser search | Search for `Moonlight Palace Hotel`. | Expected: `No hotels and available stays found for “Moonlight Palace Hotel”.` Observed: **Pending your manual browser test.** | Record the observed result after testing. | Must be performed with both local services running. |
-| Preserve Part 2 boundary | Excluded SQLite CRUD, booking, authentication, payment, and external APIs. | Confirm no database files or CRUD routes were added. | Keep Part 2 out of this checkpoint. | Future work requires explicit authorization. |
+| Use Vue + FastAPI | Added Vue/Vite frontend files and FastAPI backend files in separate folders. | Vue production build passed; browser tests passed with both local services running. | Keep browser UI and API separated. | Manual VS Code inspection remains the student's responsibility. |
+| Use instructor CSV files | SQLite is seeded from `hotels.csv`, `trips.csv`, `users.csv`, and `bookings.csv` with UTF-8 BOM support. | CSV inspection confirmed valid headers, IDs, values, and references. | Do not hard-code result data in Vue. | The CSVs are seed sources, not request-time application data. |
+| SQLite schema and initial seed | Added tables for hotels, trips, users, bookings, seed metadata, and booking ID state. | Two initializations and a real backend restart each retained 8 hotels, 12 trips, 6 users, and 6 bookings; `PRAGMA foreign_key_check` returned no issues. | Use existing instructor IDs as primary keys and preserve later database changes. | Runtime database remains intentionally out of Git. |
+| Join hotels and stays | Backend joins SQLite trips to hotels by `hotel_id` and returns `available_stays`. | FastAPI and browser checks returned `H001` with `T001` and `T009`; the browser no-results query displayed the expected message. | Preserve the Part 1 search endpoint and response shape. | No authentication, payments, or external APIs. |
+| Booking CRUD UI | Added traveler selection, Book buttons, booking history, cancellation, and protected test deletion controls. | Browser flow created and cancelled `B007`, deleted it, then created `B008` rather than reusing `B007`. Both test bookings were deleted, and a service restart confirmed neither returned while the six seeded bookings remained. Delete controls are hidden for seeded bookings, and a direct delete attempt for `B001` returned `403`. | Refresh history from FastAPI after every booking mutation and persist the highest issued ID in SQLite. | No authentication, payments, or external APIs. |
+| Successful browser search | Search for `Harbor Lantern Hotel`. | Expected: one hotel, `H001`, with *Boston Harbor Weekend* and *Boston Autumn Weekend*. Observed: **Passed** — `T001` and `T009` appeared with Book buttons. | Preserve Part 1 behavior while adding booking actions. | Must be run with both local services running. |
+| No-results browser search | Search for `Moonlight Palace Hotel`. | Expected: `No hotels and available stays found for “Moonlight Palace Hotel”.` Observed: **Passed** — the clear no-results message appeared. | Preserve Part 1 no-results behavior. | Must be run with both local services running. |
+| Preserve scope | Added the required local search and booking CRUD workflow. | Confirmed no authentication, payment, or external API integration was added. | Keep the interface simple and local. | Student must review all changed files before submission. |
 
 ## Screenshot checklist
 
@@ -21,4 +23,4 @@ Store any new submission screenshots only if your assignment requires them; do n
 
 ## AI assistance disclosure
 
-AI assisted with planning, documentation, and implementation under student direction. Manual VS Code inspection and browser testing remain the student's responsibility, and no manual browser result is claimed until the observed-result fields above are completed.
+AI assisted with planning, documentation, and implementation under student direction. Browser verification is recorded above; the student remains responsible for manual VS Code inspection and submission.
