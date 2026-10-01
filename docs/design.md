@@ -11,14 +11,14 @@ This Part 1 application is a local hotel and available-stay search. [Expedia](ht
 
 The implemented scope is a hotel-name search. The user submits a name, sees matching hotels and their available stays in a plain table, or sees a clear no-results message.
 
-Implemented in this milestone: SQLite schema creation, one-time instructor CSV seeding, SQLite-backed search, booking CRUD API routes, and the Vue booking interface. Authentication, payments, and external APIs remain out of scope.
+Implemented in this milestone: SQLite schema creation, one-time instructor CSV seeding, SQLite-backed search, booking CRUD API routes, the Vue booking interface, and an Assignment 2 Part 1 ZIP-code hotel map. The map calls Geoapify only through FastAPI, verifies a five-digit U.S. ZIP result, and displays up to 20 nearby provider hotels within 5 km. Authentication, payments, and Assignment 2 Part 2 shortlist functionality remain out of scope.
 
 ## 3. Architecture and responsibilities
 
 | Layer | Implemented responsibility |
 | --- | --- |
-| Interface | Vue traveler selector, search input, Book buttons for returned trips, status messages, and booking-history table with Cancel and Delete (test) actions. |
-| Logic | FastAPI initializes SQLite at startup, searches joined hotel/trip rows, and creates, reads, cancels, or deletes booking rows. |
+| Interface | Vue traveler selector, hotel-name search, ZIP input, nearby-hotel list, Leaflet map, Book buttons for returned trips, status messages, and booking-history table with Cancel and Delete (test) actions. The ZIP list and markers share `selectedPlaceId`. |
+| Logic | FastAPI initializes SQLite at startup, searches joined hotel/trip rows, creates, reads, cancels, or deletes booking rows, and coordinates the server-side Geoapify geocoding/Places requests. |
 | Data | Instructor-supplied hotel, trip, user, and booking CSV files seed SQLite once. No hotel result data is stored in Vue source. |
 | Communication | Browser `fetch()` calls FastAPI over local HTTP; FastAPI returns JSON. |
 
@@ -55,6 +55,14 @@ flowchart TD
 - **Output:** JSON with `search_term` and `matches`.
 - **Each match:** hotel ID, name, city, state, nightly rate, and joined `available_stays` containing trip ID, name, check-in, and check-out.
 
+### `GET /api/nearby-hotels?zip_code=<five-digit-zip>`
+
+- **Input:** exactly five ASCII digits. Leading zeros are preserved.
+- **Controller:** reads `GEOAPIFY_API_KEY` only from local backend configuration, geocodes with `countrycode:us` and `type=postcode`, and verifies the matching U.S. postcode before calling Places.
+- **Provider search:** `accommodation.hotel` inside a fixed 5,000-metre circle centered on the verified geocode; request/display limit 20.
+- **Output:** a safe outcome plus honest provider fields when available: provider place ID, hotel name, address/location, latitude, and longitude. It does not fabricate price, rating, availability, or booking information.
+- **Outcomes:** `success`, `invalid_zip`, `unresolved_zip`, `no_results`, `api_failure`, `authentication_failure`, `rate_limited`, and `configuration_error`.
+
 ### Booking API
 
 - `GET /api/users` returns SQLite users for the traveler selector.
@@ -76,6 +84,11 @@ Missing users, trips, or bookings return `404`; blank create identifiers return 
 | Booking cancelled | Keep the booking row and display `cancelled` after refreshing history. |
 | Test booking deleted | Remove the row only after the API confirms deletion, then refresh history. |
 | Backend unavailable | Show the API error message rather than presenting stale or invented results. |
+| Invalid ZIP | Show a clear five-digit input message before calling the backend. |
+| Unresolved ZIP | Show that Geoapify did not resolve the requested U.S. ZIP; do not call Places. |
+| Nearby map result | Show the same provider hotels in a keyboard-operable list and Leaflet markers; selected list/marker state stays synchronized. |
+| No nearby hotels | Show a provider empty-result message and keep it distinct from an API error. |
+| Provider failure | Show a safe authentication, rate-limit, configuration, or generic request-failure message without exposing the key. |
 
 ## 8. Verification plan
 
@@ -90,6 +103,6 @@ The same expected/observed record is maintained in `docs/evidence-log.md`.
 
 ## 9. Current state and next boundary
 
-Implemented: Vue/Vite frontend source, FastAPI search and booking CRUD routes, a SQLite schema, one-time CSV seeding, SQLite `hotel_id` join logic, plain table rendering, traveler selection, booking history, cancellation, and test deletion. Browser tests passed for create, refresh persistence, cancellation, deletion, and restart persistence.
+Implemented: Vue/Vite frontend source, FastAPI search and booking CRUD routes, a SQLite schema, one-time CSV seeding, SQLite `hotel_id` join logic, plain table rendering, traveler selection, booking history, cancellation, test deletion, and the ZIP-code Geoapify hotel-map feature. Browser tests passed for create, refresh persistence, cancellation, deletion, restart persistence, initial map rendering/attribution, and invalid-ZIP feedback. Focused backend tests simulate provider empty, failure, authentication, and rate-limit outcomes without spending provider quota.
 
-Not yet implemented: authentication, payments, and external APIs.
+Not yet implemented: authentication, payments, and Assignment 2 Part 2 shortlist functionality. A non-empty local Geoapify key is required for live-provider browser verification.

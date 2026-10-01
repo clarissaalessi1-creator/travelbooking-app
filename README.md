@@ -1,6 +1,6 @@
 # Local Travel Booking Application — Part 2 SQLite CRUD
 
-This repository preserves the Part 1 hotel and available-stay search and adds the Part 2 SQLite-backed booking workflow. Vue and FastAPI remain the frontend and backend. On the first backend start, FastAPI seeds SQLite from the four instructor-supplied CSV files; after that, application reads and writes use SQLite.
+This repository preserves the Part 1 hotel and available-stay search, adds the Part 2 SQLite-backed booking workflow, and adds the Assignment 2 Part 1 ZIP-code hotel map. Vue and FastAPI remain the frontend and backend. On the first backend start, FastAPI seeds SQLite from the four instructor-supplied CSV files; after that, application reads and writes use SQLite.
 
 ## Part 1 behavior
 
@@ -16,6 +16,8 @@ The user enters a hotel name and selects Search. The Vue frontend calls the loca
 | `fetch()` + JSON | Frontend/backend communication | Uses standard browser HTTP requests and structured responses. |
 | CSV files | One-time seed source | Preserves the instructor-supplied hotel, trip, user, and booking data. |
 | SQLite | Persistent application data | Keeps search data and future booking changes after backend restarts. |
+| Geoapify Geocoding + Places | ZIP-code hotel-provider lookup | Resolves a verified U.S. ZIP then returns provider hotels within a fixed 5 km radius. The key remains server-side. |
+| Leaflet + OpenStreetMap tiles | Interactive hotel map | Renders the same provider results as map markers with visible attribution. |
 
 ## Current implementation state
 
@@ -31,10 +33,12 @@ Implemented:
 - Booking-history table with cancellation and test-deletion controls.
 - Persistent booking IDs that are not reused after a test booking is deleted; instructor bookings `B001`–`B006` are protected from deletion.
 - A plain results table, clear no-results message, and browser-verified persistence across refreshes and service restarts.
+- A ZIP-only nearby-hotel endpoint that validates exactly five digits, verifies the matching U.S. postcode with Geoapify, and returns up to 20 provider hotel results within 5 km.
+- A Leaflet hotel list/map view with one synchronized selected provider place, visible OpenStreetMap attribution, and distinct invalid, unresolved, empty, authentication, rate-limit, and request-failure outcomes.
 
 Not implemented:
 
-- Authentication, payments, or external APIs.
+- Authentication, payments, and Assignment 2 Part 2 shortlist functionality.
 
 ## Booking API
 
@@ -45,6 +49,19 @@ The Vue interface calls these routes:
 - `GET /api/bookings` — booking history with traveler, trip, and hotel details.
 - `PATCH /api/bookings/{booking_id}/cancel` — retain a booking and mark it `cancelled`.
 - `DELETE /api/bookings/{booking_id}` — remove a temporary test booking.
+- `GET /api/nearby-hotels?zip_code=<five-digit-zip>` — return verified-zipcode Geoapify hotel-provider results. Returned hotels are not an exhaustive inventory and are not connected to booking availability.
+
+## Geoapify setup
+
+Copy the empty variable from `backend/.env.example` into the ignored local file
+`backend/.env`, then set the value locally:
+
+```text
+GEOAPIFY_API_KEY=your_key_here
+```
+
+Do not put the key in frontend code, commit it, or paste it into documentation.
+The backend is the only component that calls Geoapify.
 
 ## Run locally
 

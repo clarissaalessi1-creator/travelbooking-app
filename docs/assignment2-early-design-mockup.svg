@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1180" viewBox="0 0 1440 1180" role="img" aria-labelledby="title desc">
+  <title id="title">EARLY DESIGN: ZIP-code hotel map mockup</title>
+  <desc id="desc">Desktop and mobile early design for a ZIP-code hotel search with visible state examples, synchronized hotel list and map, and map attribution.</desc>
+  <style>
+    .page { fill: #f5f7fa; }
+    .surface { fill: #ffffff; stroke: #c8d1dc; stroke-width: 2; }
+    .frame { fill: #ffffff; stroke: #8796a5; stroke-width: 2; }
+    .ink { fill: #17212b; font-family: Arial, sans-serif; }
+    .muted { fill: #52616e; font-family: Arial, sans-serif; }
+    .label { fill: #17212b; font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; }
+    .small { fill: #52616e; font-family: Arial, sans-serif; font-size: 13px; }
+    .chip { fill: #edf2f7; stroke: #bdc9d4; stroke-width: 1; }
+    .selected { fill: #e8f2ff; stroke: #1d65a6; stroke-width: 3; }
+    .map { fill: #e5edf2; stroke: #8796a5; stroke-width: 2; }
+    .road { fill: none; stroke: #ffffff; stroke-width: 12; }
+    .roadline { fill: none; stroke: #bfccd5; stroke-width: 2; }
+    .pin { fill: #276ea8; stroke: #ffffff; stroke-width: 3; }
+    .pinSelected { fill: #c3452f; stroke: #ffffff; stroke-width: 4; }
+    .button { fill: #1d65a6; }
+    .buttonText { fill: #ffffff; font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; }
+  </style>
+  <rect class="page" width="1440" height="1180"/>
+  <text class="ink" x="64" y="56" font-size="28" font-weight="bold">EARLY DESIGN — Assignment 2 Part 1: ZIP-code hotel map</text>
+  <text class="muted" x="64" y="84" font-size="16">Prepared before implementation · Map/list selection is shown with illustrative, non-live hotel data.</text>
+
+  <rect class="surface" x="64" y="116" width="1312" height="676" rx="4"/>
+  <text class="ink" x="96" y="160" font-size="24" font-weight="bold">Hotels near a U.S. ZIP code</text>
+  <text class="label" x="96" y="200">ZIP code</text>
+  <rect class="frame" x="96" y="214" width="250" height="46" rx="3"/>
+  <text class="ink" x="112" y="244" font-size="17">02108</text>
+  <rect class="button" x="358" y="214" width="108" height="46" rx="3"/>
+  <text class="buttonText" x="379" y="244">Search</text>
+  <text class="muted" x="96" y="292" font-size="15">12 hotels found within 5 km of ZIP-code location 02108.</text>
+  <line x1="96" y1="314" x2="1344" y2="314" stroke="#d5dde5" stroke-width="2"/>
+
+  <text class="label" x="96" y="348">Hotels</text>
+  <text class="label" x="578" y="348">Map</text>
+  <rect class="selected" x="96" y="366" width="432" height="102" rx="4"/>
+  <text class="ink" x="116" y="398" font-size="18" font-weight="bold">Selected: Harbor View Hotel</text>
+  <text class="muted" x="116" y="425" font-size="15">12 Beacon St · Boston, MA 02108</text>
+  <text class="muted" x="116" y="450" font-size="14">Selected on map · Marker and popup are highlighted</text>
+  <rect class="frame" x="96" y="482" width="432" height="82" rx="4"/>
+  <text class="ink" x="116" y="514" font-size="18" font-weight="bold">Commonwealth Inn</text>
+  <text class="muted" x="116" y="540" font-size="15">9 Park St · Boston, MA 02108</text>
+  <rect class="frame" x="96" y="578" width="432" height="82" rx="4"/>
+  <text class="ink" x="116" y="610" font-size="18" font-weight="bold">Charles Street Lodge</text>
+  <text class="muted" x="116" y="636" font-size="15">52 Charles St · Boston, MA 02114</text>
+
+  <rect class="map" x="578" y="366" width="766" height="340"/>
+  <path class="road" d="M606 465 C760 420 850 525 1000 478 S1210 420 1318 495"/>
+  <path class="roadline" d="M606 465 C760 420 850 525 1000 478 S1210 420 1318 495"/>
+  <path class="road" d="M700 660 C820 580 970 610 1125 500 S1260 430 1320 395"/>
+  <path class="roadline" d="M700 660 C820 580 970 610 1125 500 S1260 430 1320 395"/>
+  <path class="road" d="M760 380 C800 480 880 590 1210 680"/>
+  <path class="roadline" d="M760 380 C800 480 880 590 1210 680"/>
+  <circle cx="966" cy="526" r="48" fill="#71a9cf" fill-opacity="0.25" stroke="#276ea8" stroke-width="2" stroke-dasharray="7 6"/>
+  <text class="small" x="898" y="592">5 km search radius</text>
+  <path class="pin" d="M810 468c0-14 11-25 25-25s25 11 25 25c0 19-25 43-25 43s-25-24-25-43z"/>
+  <circle cx="835" cy="468" r="7" fill="#ffffff"/>
+  <path class="pinSelected" d="M934 506c0-18 14-32 32-32s32 14 32 32c0 24-32 55-32 55s-32-31-32-55z"/>
+  <circle cx="966" cy="506" r="9" fill="#ffffff"/>
+  <path class="pin" d="M1100 574c0-14 11-25 25-25s25 11 25 25c0 19-25 43-25 43s-25-24-25-43z"/>
+  <circle cx="1125" cy="574" r="7" fill="#ffffff"/>
+  <rect class="surface" x="982" y="420" width="238" height="80" rx="4"/>
+  <text class="ink" x="998" y="449" font-size="16" font-weight="bold">Harbor View Hotel</text>
+  <text class="muted" x="998" y="475" font-size="13">Selected from the hotel list</text>
+  <text class="small" x="592" y="694">© OpenStreetMap contributors · Leaflet</text>
+
+  <text class="label" x="96" y="738">Selection synchronization</text>
+  <text class="small" x="96" y="766">List row click → selected text + marker/popup highlight · Marker click → selected row + keyboard focus</text>
+
+  <text class="ink" x="64" y="846" font-size="24" font-weight="bold">Required UI states</text>
+  <g transform="translate(64 870)">
+    <rect class="surface" width="242" height="130" rx="4"/><text class="label" x="16" y="27">Loading</text><text class="small" x="16" y="56">Searching near ZIP 02108…</text><rect class="chip" x="16" y="78" width="190" height="14" rx="7"/><rect fill="#8aa9bf" x="16" y="78" width="92" height="14" rx="7"/>
+  </g>
+  <g transform="translate(328 870)">
+    <rect class="surface" width="242" height="130" rx="4"/><text class="label" x="16" y="27">Invalid ZIP</text><text class="small" x="16" y="56">Enter exactly five digits.</text><text class="small" x="16" y="82">No API request is made.</text>
+  </g>
+  <g transform="translate(592 870)">
+    <rect class="surface" width="242" height="130" rx="4"/><text class="label" x="16" y="27">Unresolved ZIP</text><text class="small" x="16" y="56">We could not resolve that</text><text class="small" x="16" y="78">U.S. ZIP code.</text>
+  </g>
+  <g transform="translate(856 870)">
+    <rect class="surface" width="242" height="130" rx="4"/><text class="label" x="16" y="27">No results</text><text class="small" x="16" y="56">No hotels found within</text><text class="small" x="16" y="78">5 km of 02108.</text>
+  </g>
+  <g transform="translate(1120 870)">
+    <rect class="surface" width="242" height="130" rx="4"/><text class="label" x="16" y="27">API error</text><text class="small" x="16" y="56">Hotel search is unavailable.</text><text class="small" x="16" y="82">Try again later.</text>
+  </g>
+
+  <text class="ink" x="64" y="1046" font-size="24" font-weight="bold">Mobile layout (stacked)</text>
+  <rect class="frame" x="64" y="1064" width="280" height="96" rx="16"/>
+  <text class="label" x="84" y="1094">ZIP code  [ 02108 ]  Search</text>
+  <text class="small" x="84" y="1120">1. Hotel list (keyboard-operable)</text>
+  <text class="small" x="84" y="1144">2. Map below list, same selection state</text>
+  <rect class="frame" x="384" y="1064" width="280" height="96" rx="16"/>
+  <text class="label" x="404" y="1094">Selected hotel stays visible</text>
+  <text class="small" x="404" y="1120">Map has an explicit height</text>
+  <text class="small" x="404" y="1144">Attribution remains visible</text>
+  <text class="small" x="714" y="1112">No live API key, hotel, or map data is embedded in this early design.</text>
+</svg>

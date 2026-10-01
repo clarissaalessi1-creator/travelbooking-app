@@ -39,3 +39,31 @@ Maintain a small local hotel and available-stay search using Vue, Python, FastAP
 - Inspect the working tree before editing and preserve user changes.
 - Do not commit or push unless explicitly asked.
 - Keep changes focused and do not use destructive Git commands without authorization.
+
+## Assignment 2 Part 1 MVC responsibilities (design only)
+
+The ZIP-code hotel-map feature is planned work. It must not change the existing
+Assignment 1 hotel search, booking workflow, SQLite records, or instructor CSV
+values.
+
+- **Model:** SQLite remains the authoritative source for Assignment 1 hotels,
+  trips, users, and bookings. For the map feature, FastAPI will create
+  short-lived, validated geocoding/place result objects; it will not write
+  Geoapify data into the existing database during Part 1. It will validate a
+  U.S. ZIP code, verify the returned U.S. postcode and coordinates, and retain
+  only the response fields needed by the view.
+- **Controller:** FastAPI will expose a local, read-only endpoint that receives
+  the ZIP code, reads `GEOAPIFY_API_KEY` from server configuration, calls the
+  Geoapify forward-geocoding endpoint and then the Places endpoint, maps
+  upstream errors to safe local responses, and never returns or logs the API
+  key. It will use a fixed 5 km radius and the `accommodation.hotel` category.
+- **View:** Vue will collect the ZIP code, call the local FastAPI endpoint, and
+  render loading, invalid-ZIP, unresolved-ZIP, empty-result, and API-error
+  states. It will render the same returned hotel collection as both an
+  accessible list and Leaflet markers. A single `selectedPlaceId` state will
+  synchronize list selection, marker highlighting, popup/focus behavior, and
+  the accompanying text label; color alone must not indicate selection.
+
+Before implementation, consult `docs/assignment2-research.md` and
+`docs/assignment2-early-design-mockup.svg`. Keep Geoapify requests on the
+backend so the API key does not enter browser source, network requests, or Git.

@@ -41,3 +41,83 @@ td {
   padding: 8px;
   text-align: left;
 }
+
+.nearby-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.nearby-form label,
+.nearby-form input,
+.nearby-form button {
+  margin-right: 0;
+}
+
+.nearby-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(360px, 1.2fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.nearby-list-panel {
+  min-width: 0;
+}
+
+.nearby-hotel-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nearby-hotel-button {
+  display: grid;
+  width: 100%;
+  gap: 6px;
+  margin: 0;
+  padding: 12px;
+  border: 2px solid #4d5a66;
+  background: #ffffff;
+  color: #000000;
+  text-align: left;
+}
+
+.nearby-hotel-button.selected {
+  border-color: #8a2d1e;
+  background: #fff0eb;
+}
+
+.nearby-hotel-name {
+  font-weight: bold;
+}
+
+.selected-label {
+  font-weight: bold;
+}
+
+.nearby-map-panel {
+  min-width: 0;
+}
+
+#nearby-hotels-map {
+  height: 440px;
+  border: 1px solid #000000;
+}
+
+.inventory-notice {
+  font-style: italic;
+}
+
+@media (max-width: 760px) {
+  .nearby-layout {
+    grid-template-columns: 1fr;
+  }
+
+  #nearby-hotels-map {
+    height: 360px;
+  }
+}
