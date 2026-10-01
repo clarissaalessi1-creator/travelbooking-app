@@ -4,7 +4,7 @@
 
 - Repository: [travelbooking-app](https://github.com/clarissaalessi1-creator/travelbooking-app)
 - Working branch: `assignment-2-part-1-geo-hotel-map`
-- Assessed Assignment 2 Part 1 commit: **TBD — no Assignment 2 Part 1 commit has been created yet.**
+- Assessed Assignment 2 Part 1 commit: `aee5c058fc8675719fe3ab15176d1a66b9f8c94f`
 - Current inherited repository commit: `0fb1d44` — Final Part 2 report.
 
 The Assignment 1 history and existing local search, bookings, and SQLite data remain in the repository. Relevant preserved checkpoints are `ade03d9` (Part 1 checkpoint), `e630c44` (Part 2 implementation), and `0fb1d44` (Final Part 2 report). This report documents only the new Assignment 2 Part 1 ZIP-code hotel-map work.
