@@ -3,15 +3,15 @@
 ## Repository and assessment status
 
 - Repository: [travelbooking-app](https://github.com/clarissaalessi1-creator/travelbooking-app)
-- Working branch: `assignment-2-part-1-geo-hotel-map`
+- Working branch: `assignment2_part2_in_class`
 - Assessed Assignment 2 Part 1 commit: `aee5c058fc8675719fe3ab15176d1a66b9f8c94f`
-- Current inherited repository commit: `0fb1d44` — Final Part 2 report.
+- Current inherited repository commit: `972df90` — Finalize Assignment 2 Part 1 report.
 
 The Assignment 1 history and existing local search, bookings, and SQLite data remain in the repository. Relevant preserved checkpoints are `ade03d9` (Part 1 checkpoint), `e630c44` (Part 2 implementation), and `0fb1d44` (Final Part 2 report). This report documents only the new Assignment 2 Part 1 ZIP-code hotel-map work.
 
 ## Part 1 implementation
 
-The application adds a live hotel discovery search for an exactly five-digit U.S. ZIP code. It is discovery-only: it does not add a shortlist, booking workflow, prices, ratings, room availability, or booking claims.
+The Assignment 2 Part 1 feature adds a live hotel discovery search for an exactly five-digit U.S. ZIP code. It is discovery-only: it does not add a shortlist, booking workflow, prices, ratings, room availability, or booking claims.
 
 - `GET /api/nearby-hotels?zip_code=<ZIP>` validates the ZIP while retaining leading zeroes.
 - FastAPI uses the server-only `GEOAPIFY_API_KEY` to forward-geocode the requested ZIP, restricts candidates to the United States, and verifies the returned postcode matches the requested value before using its coordinates as the Places search center.
@@ -20,7 +20,7 @@ The application adds a live hotel discovery search for an exactly five-digit U.S
 - Vue provides the ZIP form, loading/error/result states, accessible hotel-list controls, and a Leaflet/OpenStreetMap map. The list and map share one `selectedPlaceId`: selecting a list item opens/selects its marker, and selecting a marker selects the same list item.
 - The interface says that results are not necessarily an exhaustive inventory of hotels within the area. If the provider omits a hotel name, the UI says “Hotel name unavailable from provider.” rather than creating one.
 
-Assignment 2 Part 2 shortlist functionality is intentionally not implemented.
+The Assignment 2 Part 2 in-class Add, Retain, Remove, and Local-first Lookup benchmarks permit a user to save a live provider result locally with five explicitly simulated classroom nights, remove only that saved result and its dependent nightly rows, and retrieve matching local saves before Geoapify is called. Empty local results fall back to the existing Geoapify endpoint; local lookup errors remain visible and do not fall back.
 
 ## Startup and local configuration
 
@@ -112,5 +112,6 @@ The evidence log in [docs/evidence-log.md](docs/evidence-log.md) records the pla
 
 - Hotel inventory and field completeness depend on Geoapify's live provider data and may change after the September 30, 2026 observation.
 - The 20-result display cap and 5 km circle mean the list is useful nearby-provider data, not an exhaustive hotel inventory.
-- Assignment 2 Part 2 shortlist functionality is intentionally out of scope.
+- Local-first results are filtered by the ZIP stored at save time and fit their saved marker positions; they do not claim a newly resolved 5 km ZIP-centroid circle.
+- Authentication and payments remain out of scope for the completed in-class benchmark.
 - An Assignment 2 Part 1 commit hash must be added after the reviewed changes are committed.

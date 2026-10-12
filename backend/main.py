@@ -43,6 +43,17 @@ class BookingCreate(BaseModel):
     trip_id: str
 
 
+class SavedHotelCreate(BaseModel):
+    """Provider fields needed to retain one hotel selected from a live ZIP search."""
+
+    provider_place_id: str
+    hotel_name: Optional[str] = None
+    address: Optional[str] = None
+    latitude: float
+    longitude: float
+    searched_zip_code: str
+
+
 PROTECTED_SEED_BOOKING_IDS = frozenset({"B001", "B002", "B003", "B004", "B005", "B006"})
 ZIP_CODE_PATTERN = re.compile(r"^\d{5}$")
 GEOAPIFY_GEOCODING_URL = "https://api.geoapify.com/v1/geocode/search"
@@ -50,6 +61,13 @@ GEOAPIFY_PLACES_URL = "https://api.geoapify.com/v2/places"
 GEOAPIFY_HOTEL_CATEGORY = "accommodation.hotel"
 GEOAPIFY_RADIUS_METERS = 5_000
 GEOAPIFY_RESULT_LIMIT = 20
+DEMO_HOTEL_NIGHT_DATES = (
+    "2026-10-10",
+    "2026-10-11",
+    "2026-10-12",
+    "2026-10-13",
+    "2026-10-14",
+)
 BOOKING_HISTORY_QUERY = """
     SELECT
         bookings.booking_id,
@@ -275,6 +293,174 @@ def normalize_places(places_response: dict[str, Any]) -> list[dict[str, Any]]:
     return hotels
 
 
+def add_saved_status_to_places(hotels: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Mark only the live provider results that already have a saved local row."""
+    provider_place_ids = [hotel["provider_place_id"] for hotel in hotels]
+    if not provider_place_ids:
+        return hotels
+
+    placeholders = ", ".join("?" for _ in provider_place_ids)
+    with get_connection() as connection:
+        saved_place_ids = {
+            row["provider_place_id"]
+            for row in connection.execute(
+                f"SELECT provider_place_id FROM saved_hotels "
+                f"WHERE provider_place_id IN ({placeholders})",
+                provider_place_ids,
+            ).fetchall()
+        }
+
+    return [
+        {**hotel, "is_saved_locally": hotel["provider_place_id"] in saved_place_ids}
+        for hotel in hotels
+    ]
+
+
+def normalize_saved_hotel_request(
+    saved_hotel_request: SavedHotelCreate,
+) -> tuple[str, Optional[str], Optional[str], float, float, str]:
+    """Validate the narrow provider payload before writing it to local SQLite."""
+    provider_place_id = clean_text(saved_hotel_request.provider_place_id)
+    searched_zip_code = saved_hotel_request.searched_zip_code.strip()
+    if provider_place_id is None:
+        raise HTTPException(status_code=422, detail="provider_place_id is required")
+    if not ZIP_CODE_PATTERN.fullmatch(searched_zip_code):
+        raise HTTPException(status_code=422, detail="searched_zip_code must contain exactly five digits")
+    if not is_valid_coordinate(saved_hotel_request.latitude, saved_hotel_request.longitude):
+        raise HTTPException(status_code=422, detail="latitude and longitude must be valid coordinates")
+
+    return (
+        provider_place_id,
+        clean_text(saved_hotel_request.hotel_name),
+        clean_text(saved_hotel_request.address),
+        float(saved_hotel_request.latitude),
+        float(saved_hotel_request.longitude),
+        searched_zip_code,
+    )
+
+
+def save_provider_hotel(
+    saved_hotel_request: SavedHotelCreate,
+) -> tuple[dict[str, Any], bool]:
+    """Persist a selected provider hotel once, with five default demo-night rows."""
+    (
+        provider_place_id,
+        hotel_name,
+        address,
+        latitude,
+        longitude,
+        searched_zip_code,
+    ) = normalize_saved_hotel_request(saved_hotel_request)
+
+    with get_connection() as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        existing = connection.execute(
+            """SELECT saved_hotel_id, provider_place_id, hotel_name, address,
+                      latitude, longitude, searched_zip_code
+               FROM saved_hotels WHERE provider_place_id = ?""",
+            (provider_place_id,),
+        ).fetchone()
+        if existing is not None:
+            return dict(existing), False
+
+        result = connection.execute(
+            """INSERT INTO saved_hotels
+               (provider_place_id, hotel_name, address, latitude, longitude, searched_zip_code)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (provider_place_id, hotel_name, address, latitude, longitude, searched_zip_code),
+        )
+        saved_hotel_id = result.lastrowid
+        connection.executemany(
+            "INSERT INTO demo_hotel_nights (saved_hotel_id, stay_date) VALUES (?, ?)",
+            [(saved_hotel_id, stay_date) for stay_date in DEMO_HOTEL_NIGHT_DATES],
+        )
+        created = connection.execute(
+            """SELECT saved_hotel_id, provider_place_id, hotel_name, address,
+                      latitude, longitude, searched_zip_code
+               FROM saved_hotels WHERE saved_hotel_id = ?""",
+            (saved_hotel_id,),
+        ).fetchone()
+
+    if created is None:
+        raise RuntimeError("Saved hotel was not created")
+    return dict(created), True
+
+
+def remove_saved_provider_hotel(provider_place_id: str) -> bool:
+    """Delete one saved provider hotel and let SQLite cascade its demo nights."""
+    normalized_place_id = clean_text(provider_place_id)
+    if normalized_place_id is None:
+        raise HTTPException(status_code=422, detail="provider_place_id is required")
+
+    try:
+        with get_connection() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            deleted_count = connection.execute(
+                "DELETE FROM saved_hotels WHERE provider_place_id = ?",
+                (normalized_place_id,),
+            ).rowcount
+    except sqlite3.DatabaseError as error:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not remove the saved hotel. Please try again.",
+        ) from error
+
+    return deleted_count == 1
+
+
+def find_saved_hotels_for_zip(zip_code: str) -> list[dict[str, Any]]:
+    """Return saved hotels and their stored classroom nights for one ZIP code."""
+    with get_connection() as connection:
+        rows = connection.execute(
+            """
+            SELECT
+                saved_hotels.saved_hotel_id,
+                saved_hotels.provider_place_id,
+                saved_hotels.hotel_name,
+                saved_hotels.address,
+                saved_hotels.latitude,
+                saved_hotels.longitude,
+                saved_hotels.searched_zip_code,
+                demo_hotel_nights.stay_date,
+                demo_hotel_nights.nightly_rate_cents,
+                demo_hotel_nights.rooms_available
+            FROM saved_hotels
+            LEFT JOIN demo_hotel_nights
+                ON demo_hotel_nights.saved_hotel_id = saved_hotels.saved_hotel_id
+            WHERE saved_hotels.searched_zip_code = ?
+            ORDER BY saved_hotels.saved_hotel_id, demo_hotel_nights.stay_date
+            """,
+            (zip_code,),
+        ).fetchall()
+
+    hotels_by_id: dict[int, dict[str, Any]] = {}
+    for row in rows:
+        saved_hotel_id = row["saved_hotel_id"]
+        hotel = hotels_by_id.get(saved_hotel_id)
+        if hotel is None:
+            hotel = {
+                "provider_place_id": row["provider_place_id"],
+                "hotel_name": row["hotel_name"],
+                "address": row["address"],
+                "latitude": row["latitude"],
+                "longitude": row["longitude"],
+                "searched_zip_code": row["searched_zip_code"],
+                "is_saved_locally": True,
+                "simulated_nights": [],
+            }
+            hotels_by_id[saved_hotel_id] = hotel
+        if row["stay_date"] is not None:
+            hotel["simulated_nights"].append(
+                {
+                    "stay_date": row["stay_date"],
+                    "nightly_rate_cents": row["nightly_rate_cents"],
+                    "rooms_available": row["rooms_available"],
+                }
+            )
+
+    return list(hotels_by_id.values())
+
+
 def search_nearby_hotels_for_zip(zip_code: str, api_key: str) -> dict[str, Any]:
     """Resolve a verified U.S. ZIP and return up to 20 nearby provider hotels."""
     try:
@@ -318,7 +504,7 @@ def search_nearby_hotels_for_zip(zip_code: str, api_key: str) -> dict[str, Any]:
     except GeoapifyRequestError as error:
         raise_for_geoapify_error(error)
 
-    hotels = normalize_places(places_response)
+    hotels = add_saved_status_to_places(normalize_places(places_response))
     response = {
         "zip_code": zip_code,
         "center": location,
@@ -441,6 +627,65 @@ def search_nearby_hotels(zip_code: str = Query(...)) -> dict[str, Any]:
             },
         )
     return search_nearby_hotels_for_zip(normalized_zip, get_geoapify_api_key())
+
+
+@app.get("/api/saved-hotels")
+def list_saved_hotels(zip_code: str = Query(...)) -> dict[str, Any]:
+    """Look up saved hotels first without making an upstream provider request."""
+    normalized_zip = zip_code.strip()
+    if not ZIP_CODE_PATTERN.fullmatch(normalized_zip):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Enter exactly five digits for a U.S. ZIP code.",
+        )
+    try:
+        hotels = find_saved_hotels_for_zip(normalized_zip)
+    except sqlite3.DatabaseError as error:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not load saved local hotels. Please try again.",
+        ) from error
+
+    return {
+        "outcome": "success",
+        "source": "local",
+        "zip_code": normalized_zip,
+        "hotels": hotels,
+        "message": (
+            f"{len(hotels)} saved local hotel(s) found for {normalized_zip}."
+            if hotels
+            else f"No saved local hotels found for {normalized_zip}."
+        ),
+    }
+
+
+@app.post("/api/saved-hotels")
+def create_saved_hotel(saved_hotel_request: SavedHotelCreate) -> dict[str, Any]:
+    """Save one live provider hotel and its five simulated classroom night rows."""
+    saved_hotel, created = save_provider_hotel(saved_hotel_request)
+    message = (
+        "Saved locally with five simulated classroom nights."
+        if created
+        else "This hotel is already saved locally."
+    )
+    return {
+        "saved_hotel": saved_hotel,
+        "is_saved_locally": True,
+        "created": created,
+        "message": message,
+    }
+
+
+@app.delete("/api/saved-hotels/{provider_place_id}")
+def delete_saved_hotel(provider_place_id: str) -> dict[str, Any]:
+    """Remove one saved provider hotel and its related simulated night records."""
+    if not remove_saved_provider_hotel(provider_place_id):
+        raise HTTPException(status_code=404, detail="Saved hotel not found locally.")
+    return {
+        "provider_place_id": provider_place_id.strip(),
+        "is_saved_locally": False,
+        "message": "Removed from Local. The related simulated nightly records were also deleted.",
+    }
 
 
 @app.get("/api/users")

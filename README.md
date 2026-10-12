@@ -35,10 +35,12 @@ Implemented:
 - A plain results table, clear no-results message, and browser-verified persistence across refreshes and service restarts.
 - A ZIP-only nearby-hotel endpoint that validates exactly five digits, verifies the matching U.S. postcode with Geoapify, and returns up to 20 provider hotel results within 5 km.
 - A Leaflet hotel list/map view with one synchronized selected provider place, visible OpenStreetMap attribution, and distinct invalid, unresolved, empty, authentication, rate-limit, and request-failure outcomes.
+- Add to Local and Remove from Local actions for live Geoapify hotel results. Adding saves provider data once and creates five simulated classroom nights (October 10–14, 2026); removing a saved result deletes only it and its related simulated nights, then makes that live result addable again.
+- A local-first ZIP lookup: matching saved hotels appear before any Geoapify request, with their stored simulated nightly rates and room counts. An empty local result falls back to the existing Geoapify endpoint and is labeled `API results`; a local lookup error is shown without fallback.
 
 Not implemented:
 
-- Authentication, payments, and Assignment 2 Part 2 shortlist functionality.
+- Authentication and payments.
 
 ## Booking API
 
@@ -50,6 +52,9 @@ The Vue interface calls these routes:
 - `PATCH /api/bookings/{booking_id}/cancel` — retain a booking and mark it `cancelled`.
 - `DELETE /api/bookings/{booking_id}` — remove a temporary test booking.
 - `GET /api/nearby-hotels?zip_code=<five-digit-zip>` — return verified-zipcode Geoapify hotel-provider results. Returned hotels are not an exhaustive inventory and are not connected to booking availability.
+- `GET /api/saved-hotels?zip_code=<five-digit-zip>` — return only saved hotels for that ZIP and their stored simulated nightly rates/rooms; this makes no Geoapify request.
+- `POST /api/saved-hotels` — retain one selected live provider result once and create five clearly labeled simulated classroom nights. It does not overwrite a duplicate provider place ID.
+- `DELETE /api/saved-hotels/{provider_place_id}` — remove one locally saved provider result and cascade-delete only its related simulated nightly records.
 
 ## Geoapify setup
 

@@ -25,7 +25,11 @@ const nearbyHotels = ref([]);
 const nearbyOutcome = ref('idle');
 const nearbyMessage = ref('Enter a five-digit U.S. ZIP code to find nearby hotel-provider results.');
 const nearbyInventoryNotice = ref('');
+const nearbyResultsSource = ref('');
 const isNearbySearching = ref(false);
+const savingPlaceIds = ref(new Set());
+const removingPlaceIds = ref(new Set());
+const nearbySaveMessage = ref('');
 const selectedPlaceId = ref('');
 const nearbyMapContainer = ref(null);
 
@@ -187,6 +191,10 @@ function buildNearbyPopup(hotel) {
   return popup;
 }
 
+function formatSimulatedRate(nightlyRateCents) {
+  return `$${(Number(nightlyRateCents) / 100).toFixed(2)}`;
+}
+
 function nearbyHotelDisplayName(hotel) {
   return hotel.hotel_name || 'Hotel name unavailable from provider.';
 }
@@ -262,22 +270,25 @@ function selectNearbyHotel(placeId, focusList = false) {
   }
 }
 
-function renderNearbyMap(center, hotels) {
+function renderNearbyMap(hotels, center = null) {
   initializeNearbyMap();
   if (!nearbyMap || !nearbyMarkerLayer) {
     return;
   }
 
   clearNearbyMap(false);
-  const location = [center.latitude, center.longitude];
-  nearbyRadiusCircle = L.circle(location, {
-    radius: 5000,
-    color: '#1d65a6',
-    fillColor: '#3f88c5',
-    fillOpacity: 0.08,
-    weight: 2,
-  }).addTo(nearbyMap);
+  if (center) {
+    const location = [center.latitude, center.longitude];
+    nearbyRadiusCircle = L.circle(location, {
+      radius: 5000,
+      color: '#1d65a6',
+      fillColor: '#3f88c5',
+      fillOpacity: 0.08,
+      weight: 2,
+    }).addTo(nearbyMap);
+  }
 
+  const markerBounds = L.latLngBounds([]);
   for (const hotel of hotels) {
     const marker = L.circleMarker(
       [hotel.latitude, hotel.longitude],
@@ -286,9 +297,14 @@ function renderNearbyMap(center, hotels) {
     marker.bindPopup(buildNearbyPopup(hotel));
     marker.on('click', () => selectNearbyHotel(hotel.provider_place_id, true));
     nearbyMarkers.set(hotel.provider_place_id, marker);
+    markerBounds.extend(marker.getLatLng());
   }
 
-  nearbyMap.fitBounds(nearbyRadiusCircle.getBounds(), { padding: [24, 24] });
+  if (nearbyRadiusCircle) {
+    nearbyMap.fitBounds(nearbyRadiusCircle.getBounds(), { padding: [24, 24] });
+  } else if (markerBounds.isValid()) {
+    nearbyMap.fitBounds(markerBounds, { padding: [24, 24], maxZoom: 14 });
+  }
   window.setTimeout(() => nearbyMap.invalidateSize(), 0);
 }
 
@@ -307,11 +323,82 @@ async function nearbyHotelRequest(zipCode) {
   };
 }
 
+function isSavingNearbyHotel(placeId) {
+  return savingPlaceIds.value.has(placeId);
+}
+
+function isRemovingNearbyHotel(placeId) {
+  return removingPlaceIds.value.has(placeId);
+}
+
+async function saveNearbyHotel(hotel) {
+  const placeId = hotel.provider_place_id;
+  if (hotel.is_saved_locally || isSavingNearbyHotel(placeId) || isRemovingNearbyHotel(placeId)) {
+    return;
+  }
+
+  savingPlaceIds.value = new Set([...savingPlaceIds.value, placeId]);
+  nearbySaveMessage.value = `Saving ${nearbyHotelDisplayName(hotel)} locally…`;
+
+  try {
+    const data = await apiRequest('/api/saved-hotels', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        provider_place_id: hotel.provider_place_id,
+        hotel_name: hotel.hotel_name || null,
+        address: hotel.address || null,
+        latitude: hotel.latitude,
+        longitude: hotel.longitude,
+        searched_zip_code: nearbyZipCode.value.trim(),
+      }),
+    });
+    hotel.is_saved_locally = true;
+    nearbySaveMessage.value = data.message || 'Saved locally.';
+  } catch (error) {
+    nearbySaveMessage.value = error.message;
+  } finally {
+    const pendingPlaceIds = new Set(savingPlaceIds.value);
+    pendingPlaceIds.delete(placeId);
+    savingPlaceIds.value = pendingPlaceIds;
+  }
+}
+
+async function removeNearbyHotel(hotel) {
+  const placeId = hotel.provider_place_id;
+  if (!hotel.is_saved_locally || isRemovingNearbyHotel(placeId)) {
+    return;
+  }
+
+  removingPlaceIds.value = new Set([...removingPlaceIds.value, placeId]);
+  nearbySaveMessage.value = `Removing ${nearbyHotelDisplayName(hotel)} from Local…`;
+
+  try {
+    const data = await apiRequest(`/api/saved-hotels/${encodeURIComponent(placeId)}`, {
+      method: 'DELETE',
+    });
+    hotel.is_saved_locally = false;
+    hotel.simulated_nights = [];
+    if (!nearbyHotels.value.some((candidate) => candidate.is_saved_locally)) {
+      nearbyResultsSource.value = '';
+    }
+    nearbySaveMessage.value = data.message || 'Removed from Local.';
+  } catch (error) {
+    nearbySaveMessage.value = `Could not remove from Local: ${error.message}`;
+  } finally {
+    const pendingPlaceIds = new Set(removingPlaceIds.value);
+    pendingPlaceIds.delete(placeId);
+    removingPlaceIds.value = pendingPlaceIds;
+  }
+}
+
 async function searchNearbyHotels() {
   const zipCode = nearbyZipCode.value.trim();
   nearbyHotels.value = [];
   selectedPlaceId.value = '';
   nearbyInventoryNotice.value = '';
+  nearbyResultsSource.value = '';
+  nearbySaveMessage.value = '';
   clearNearbyMap();
 
   if (!/^\d{5}$/.test(zipCode)) {
@@ -324,8 +411,31 @@ async function searchNearbyHotels() {
   nearbyOutcome.value = 'loading';
   nearbyMessage.value = `Searching for hotel-provider results near ${zipCode}…`;
 
+  let localData;
+  try {
+    localData = await apiRequest(`/api/saved-hotels?zip_code=${encodeURIComponent(zipCode)}`);
+  } catch (error) {
+    nearbyOutcome.value = 'local_lookup_error';
+    nearbyMessage.value = `Could not load saved local hotels: ${error.message}`;
+    return;
+  }
+
+  if (Array.isArray(localData.hotels) && localData.hotels.length > 0) {
+    nearbyOutcome.value = 'success';
+    nearbyResultsSource.value = 'local';
+    nearbyMessage.value = localData.message || 'Saved local hotels found.';
+    nearbyInventoryNotice.value = 'Saved local results use stored simulated classroom data.';
+    nearbyHotels.value = localData.hotels;
+    await nextTick();
+    renderNearbyMap(nearbyHotels.value);
+    selectNearbyHotel(nearbyHotels.value[0].provider_place_id);
+    isNearbySearching.value = false;
+    return;
+  }
+
   try {
     const data = await nearbyHotelRequest(zipCode);
+    nearbyResultsSource.value = 'api';
     nearbyOutcome.value = data.outcome || 'api_failure';
     nearbyMessage.value = data.message || 'Hotel map search is temporarily unavailable. Please try again later.';
     nearbyInventoryNotice.value = data.inventory_notice || '';
@@ -333,7 +443,7 @@ async function searchNearbyHotels() {
     if (data.outcome === 'success' || data.outcome === 'no_results') {
       nearbyHotels.value = Array.isArray(data.hotels) ? data.hotels : [];
       await nextTick();
-      renderNearbyMap(data.center, nearbyHotels.value);
+      renderNearbyMap(nearbyHotels.value, data.center);
       if (data.outcome === 'success' && nearbyHotels.value.length > 0) {
         selectNearbyHotel(nearbyHotels.value[0].provider_place_id);
       }
@@ -446,12 +556,17 @@ onBeforeUnmount(() => {
       </form>
       <p id="nearby-search-help">Searches Geoapify hotel-provider results within 5 km of the ZIP-code location.</p>
       <p id="nearby-search-status" aria-live="polite">{{ nearbyMessage }}</p>
+      <p v-if="nearbyResultsSource" class="nearby-results-source" aria-live="polite">
+        {{ nearbyResultsSource === 'local' ? 'Saved locally' : 'API results' }}
+      </p>
+      <p class="simulated-data-note">Saved hotels receive five simulated classroom-data nights (October 10–14, 2026): $100.00 per night and 20 rooms available.</p>
+      <p v-if="nearbySaveMessage" aria-live="polite">{{ nearbySaveMessage }}</p>
 
       <div class="nearby-layout">
         <div class="nearby-list-panel" aria-label="Nearby hotel results">
           <p v-if="nearbyHotels.length === 0 && nearbyOutcome === 'no_results'">No hotel list is available for this search.</p>
           <ul v-if="nearbyHotels.length > 0" class="nearby-hotel-list">
-            <li v-for="hotel in nearbyHotels" :key="hotel.provider_place_id">
+            <li v-for="hotel in nearbyHotels" :key="hotel.provider_place_id" class="nearby-hotel-item">
               <button
                 :ref="(element) => setNearbyHotelRow(element, hotel.provider_place_id)"
                 class="nearby-hotel-button"
@@ -464,6 +579,33 @@ onBeforeUnmount(() => {
                 <span v-if="hotel.provider_place_id === selectedPlaceId" class="selected-label">Selected</span>
                 <span>{{ hotel.address || 'Address unavailable from provider.' }}</span>
               </button>
+              <div class="nearby-hotel-actions">
+                <button
+                  type="button"
+                  :disabled="hotel.is_saved_locally || isSavingNearbyHotel(hotel.provider_place_id) || isRemovingNearbyHotel(hotel.provider_place_id)"
+                  @click="saveNearbyHotel(hotel)"
+                >
+                  {{ isSavingNearbyHotel(hotel.provider_place_id) ? 'Saving…' : 'Add to Local' }}
+                </button>
+                <span v-if="hotel.is_saved_locally" class="saved-locally-label">Saved locally</span>
+                <button
+                  v-if="hotel.is_saved_locally"
+                  type="button"
+                  :disabled="isRemovingNearbyHotel(hotel.provider_place_id)"
+                  @click="removeNearbyHotel(hotel)"
+                >
+                  {{ isRemovingNearbyHotel(hotel.provider_place_id) ? 'Removing…' : 'Remove from Local' }}
+                </button>
+              </div>
+              <div v-if="hotel.simulated_nights?.length" class="simulated-night-details">
+                <span class="simulated-data-note">Simulated classroom data</span>
+                <ul aria-label="Stored nightly rate and room availability">
+                  <li v-for="night in hotel.simulated_nights" :key="night.stay_date">
+                    {{ night.stay_date }} — {{ formatSimulatedRate(night.nightly_rate_cents) }},
+                    {{ night.rooms_available }} rooms available
+                  </li>
+                </ul>
+              </div>
             </li>
           </ul>
         </div>

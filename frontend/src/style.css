@@ -74,6 +74,11 @@ td {
   list-style: none;
 }
 
+.nearby-hotel-item {
+  display: grid;
+  gap: 6px;
+}
+
 .nearby-hotel-button {
   display: grid;
   width: 100%;
@@ -93,6 +98,23 @@ td {
 
 .nearby-hotel-name {
   font-weight: bold;
+}
+
+.nearby-hotel-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.saved-locally-label,
+.simulated-data-note,
+.nearby-results-source {
+  font-weight: bold;
+}
+
+.simulated-night-details ul {
+  margin: 0;
+  padding-left: 20px;
 }
 
 .selected-label {
