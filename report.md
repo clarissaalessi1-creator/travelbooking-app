@@ -4,7 +4,8 @@
 
 - **Repository:** [travelbooking-app](https://github.com/clarissaalessi1-creator/travelbooking-app)
 - **Branch:** [`assignment2_part2_chatbot`](https://github.com/clarissaalessi1-creator/travelbooking-app/tree/assignment2_part2_chatbot)
-- **Implementation commit:** recorded after the initial submission commit is created.
+- **Implementation commit:** [`41247b3`](https://github.com/clarissaalessi1-creator/travelbooking-app/commit/41247b3)
+  — `Complete Assignment 2 Part 2 chatbot`.
 - **Report location:** `report.md` at the repository root.
 - **Demonstration:** no recording link is invented. See the required recording
   checklist in [docs/evidence/demo-recording-checklist.md](docs/evidence/demo-recording-checklist.md).
