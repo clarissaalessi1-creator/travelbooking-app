@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1490" viewBox="0 0 1440 1490" role="img" aria-labelledby="title desc">
+  <title id="title">Early chatbot interface mockup for Assignment 2 Part 2</title>
+  <desc id="desc">A beginner-friendly, pre-implementation mockup showing the chatbot question input, a successful local hotel recommendation, and loading, no-match, invalid-date, unsafe-SQL, provider-error, and network-error states.</desc>
+  <style>
+    .page { fill: #f6f8fb; }
+    .panel { fill: #ffffff; stroke: #d9e1ec; stroke-width: 2; }
+    .card { fill: #ffffff; stroke: #dce4ee; stroke-width: 1.5; }
+    .title { font: 700 32px Arial, sans-serif; fill: #162235; }
+    .subtitle { font: 16px Arial, sans-serif; fill: #526174; }
+    .eyebrow { font: 700 13px Arial, sans-serif; letter-spacing: 1.4px; fill: #28614d; }
+    .heading { font: 700 21px Arial, sans-serif; fill: #162235; }
+    .body { font: 15px Arial, sans-serif; fill: #344357; }
+    .small { font: 13px Arial, sans-serif; fill: #526174; }
+    .label { font: 700 13px Arial, sans-serif; fill: #344357; }
+    .button { font: 700 15px Arial, sans-serif; fill: #ffffff; text-anchor: middle; }
+    .chip { font: 700 12px Arial, sans-serif; fill: #28614d; }
+    .status { font: 700 14px Arial, sans-serif; fill: #162235; }
+    .user { fill: #e9f2ff; stroke: #b9d6ff; stroke-width: 1.5; }
+    .assistant { fill: #f2faf5; stroke: #b9e0cb; stroke-width: 1.5; }
+    .warning { fill: #fff7e6; stroke: #efc56d; stroke-width: 1.5; }
+    .danger { fill: #fff0f0; stroke: #efb4b4; stroke-width: 1.5; }
+    .info { fill: #edf6ff; stroke: #b7d9f7; stroke-width: 1.5; }
+    .flow { fill: #f0f4f9; stroke: #cad5e3; stroke-width: 1.5; }
+  </style>
+
+  <rect class="page" width="1440" height="1490"/>
+  <text x="82" y="66" class="eyebrow">EARLY DESIGN • PRE-IMPLEMENTATION • OCTOBER 2026</text>
+  <text x="82" y="111" class="title">Assignment 2 Part 2: Local Hotel Chatbot</text>
+  <text x="82" y="141" class="subtitle">Illustrative interface only — no chatbot, provider request, database change, or API key is present in this mockup.</text>
+
+  <rect x="72" y="182" width="886" height="777" rx="18" class="panel"/>
+  <text x="108" y="228" class="heading">Ask about saved local hotels</text>
+  <text x="108" y="254" class="small">Answers use stored classroom data only. Prices and room counts are simulated, not booking offers.</text>
+
+  <rect x="108" y="280" width="610" height="54" rx="9" fill="#ffffff" stroke="#94a6bb" stroke-width="2"/>
+  <text x="126" y="314" class="body">Which saved hotel has rooms for 2026-10-10 to 2026-10-12?</text>
+  <rect x="734" y="280" width="178" height="54" rx="9" fill="#236b55"/>
+  <text x="823" y="314" class="button">Send</text>
+  <text x="108" y="361" class="small">Try: “Find a saved hotel for 2026-10-10 to 2026-10-12.” Checkout is not charged.</text>
+
+  <rect x="108" y="391" width="462" height="61" rx="11" class="user"/>
+  <text x="128" y="418" class="label">You</text>
+  <text x="128" y="440" class="body">Which saved hotel has rooms for Oct 10–12?</text>
+
+  <rect x="108" y="474" width="804" height="332" rx="13" class="assistant"/>
+  <text x="132" y="507" class="label">Hotel helper</text>
+  <rect x="132" y="523" width="150" height="25" rx="12" fill="#dcefe4"/>
+  <text x="148" y="541" class="chip">SAVED LOCALLY</text>
+  <text x="132" y="583" class="heading">Example Saved Hotel</text>
+  <text x="132" y="611" class="body">A complete simulated stay is available for 2026-10-10 to 2026-10-12 (2 nights).</text>
+
+  <rect x="132" y="638" width="230" height="94" rx="10" fill="#ffffff" stroke="#c9dfd1"/>
+  <text x="150" y="666" class="small">SIMULATED TOTAL</text>
+  <text x="150" y="704" style="font:700 28px Arial,sans-serif;fill:#162235">$200.00</text>
+  <text x="150" y="722" class="small">2 stored nightly rates</text>
+
+  <rect x="381" y="638" width="230" height="94" rx="10" fill="#ffffff" stroke="#c9dfd1"/>
+  <text x="399" y="666" class="small">SIMULATED ROOMS</text>
+  <text x="399" y="704" style="font:700 28px Arial,sans-serif;fill:#162235">7 rooms</text>
+  <text x="399" y="722" class="small">minimum across both nights</text>
+
+  <rect x="630" y="638" width="250" height="94" rx="10" fill="#ffffff" stroke="#c9dfd1"/>
+  <text x="648" y="666" class="small">DATE RULE</text>
+  <text x="648" y="696" class="body">Check-in is included.</text>
+  <text x="648" y="718" class="body">Checkout is not charged.</text>
+
+  <text x="132" y="770" class="small">Illustrative result only. The final answer must identify rates and rooms as simulated classroom data.</text>
+
+  <rect x="108" y="834" width="804" height="89" rx="11" class="info"/>
+  <text x="130" y="862" class="label">How this remains grounded</text>
+  <text x="130" y="886" class="body">The helper checks only approved saved-hotel rows, then calculates the total and minimum rooms before writing its answer.</text>
+  <text x="130" y="908" class="small">It does not create a booking, change data, or show raw SQL.</text>
+
+  <text x="1006" y="228" class="heading">Plain-language states</text>
+  <text x="1006" y="254" class="small">Each state tells a beginner what happened and what to do next.</text>
+
+  <rect x="990" y="280" width="378" height="96" rx="12" class="info"/>
+  <text x="1010" y="309" class="status">Loading</text>
+  <text x="1010" y="334" class="body">Checking saved classroom hotel data…</text>
+  <text x="1010" y="356" class="small">Send is disabled while the answer is prepared.</text>
+
+  <rect x="990" y="393" width="378" height="105" rx="12" class="warning"/>
+  <text x="1010" y="422" class="status">No matching hotels</text>
+  <text x="1010" y="447" class="body">No saved hotel has a complete stay for those dates.</text>
+  <text x="1010" y="471" class="small">Try other dates or save a hotel in the ZIP search.</text>
+
+  <rect x="990" y="515" width="378" height="107" rx="12" class="warning"/>
+  <text x="1010" y="544" class="status">Invalid dates</text>
+  <text x="1010" y="569" class="body">Use YYYY-MM-DD and choose a checkout after check-in.</text>
+  <text x="1010" y="594" class="small">Example: 2026-10-10 to 2026-10-12.</text>
+
+  <rect x="990" y="639" width="378" height="113" rx="12" class="danger"/>
+  <text x="1010" y="668" class="status">Unsafe query rejected</text>
+  <text x="1010" y="693" class="body">For safety, that request could not be used</text>
+  <text x="1010" y="715" class="body">to query the database.</text>
+  <text x="1010" y="738" class="small">Rephrase as a hotel/date question. Raw SQL is never shown.</text>
+
+  <rect x="990" y="769" width="378" height="80" rx="12" class="danger"/>
+  <text x="1010" y="798" class="status">Provider error</text>
+  <text x="1010" y="823" class="body">The answer service is unavailable. Try again later.</text>
+
+  <rect x="990" y="866" width="378" height="80" rx="12" class="danger"/>
+  <text x="1010" y="895" class="status">Network error</text>
+  <text x="1010" y="920" class="body">The local chatbot service could not be reached.</text>
+  <text x="1010" y="940" class="small">Check the backend and retry.</text>
+
+  <rect x="72" y="1003" width="1296" height="389" rx="18" class="panel"/>
+  <text x="108" y="1050" class="heading">Proposed safety path (shown for review; not implemented)</text>
+  <text x="108" y="1077" class="small">The language model helps interpret and explain. FastAPI and SQLite enforce the actual data-access rules.</text>
+
+  <rect x="110" y="1120" width="183" height="97" rx="13" class="flow"/>
+  <text x="132" y="1153" class="label">1. Question</text>
+  <text x="132" y="1180" class="body">Vue sends a hotel</text>
+  <text x="132" y="1202" class="body">and date question.</text>
+  <path d="M 304 1168 L 344 1168" stroke="#708299" stroke-width="3"/>
+  <path d="M 336 1160 L 348 1168 L 336 1176" fill="none" stroke="#708299" stroke-width="3"/>
+
+  <rect x="352" y="1120" width="183" height="97" rx="13" class="flow"/>
+  <text x="374" y="1153" class="label">2. Stage 1 LLM</text>
+  <text x="374" y="1180" class="body">Proposes one</text>
+  <text x="374" y="1202" class="body">read-only query.</text>
+  <path d="M 546 1168 L 586 1168" stroke="#708299" stroke-width="3"/>
+  <path d="M 578 1160 L 590 1168 L 578 1176" fill="none" stroke="#708299" stroke-width="3"/>
+
+  <rect x="594" y="1120" width="183" height="97" rx="13" fill="#fff7e6" stroke="#efc56d" stroke-width="1.5"/>
+  <text x="616" y="1153" class="label">3. Validator</text>
+  <text x="616" y="1180" class="body">Rejects unsafe</text>
+  <text x="616" y="1202" class="body">or unknown SQL.</text>
+  <path d="M 788 1168 L 828 1168" stroke="#708299" stroke-width="3"/>
+  <path d="M 820 1160 L 832 1168 L 820 1176" fill="none" stroke="#708299" stroke-width="3"/>
+
+  <rect x="836" y="1120" width="183" height="97" rx="13" class="flow"/>
+  <text x="858" y="1153" class="label">4. Read-only SQLite</text>
+  <text x="858" y="1180" class="body">Allowlisted tables,</text>
+  <text x="858" y="1202" class="body">limits, no writes.</text>
+  <path d="M 1030 1168 L 1070 1168" stroke="#708299" stroke-width="3"/>
+  <path d="M 1062 1160 L 1074 1168 L 1062 1176" fill="none" stroke="#708299" stroke-width="3"/>
+
+  <rect x="1078" y="1120" width="226" height="97" rx="13" class="flow"/>
+  <text x="1100" y="1153" class="label">5. Grounded answer</text>
+  <text x="1100" y="1180" class="body">Stage 2 explains only</text>
+  <text x="1100" y="1202" class="body">the approved results.</text>
+
+  <rect x="110" y="1260" width="1194" height="85" rx="12" fill="#eef5f0" stroke="#c7ddcf" stroke-width="1.5"/>
+  <text x="134" y="1291" class="label">Always preserved</text>
+  <text x="134" y="1316" class="small">Assignment 1 tables and records, saved hotel records, manually edited nightly rates and room availability, existing ZIP search, map/list synchronization,</text>
+  <text x="134" y="1336" class="small">Add to Local, and Remove from Local.</text>
+</svg>

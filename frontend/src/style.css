@@ -134,6 +134,91 @@ td {
   font-style: italic;
 }
 
+.chatbot-section {
+  max-width: 900px;
+}
+
+.chatbot-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.chatbot-form label,
+.chatbot-form input,
+.chatbot-form button {
+  margin-right: 0;
+}
+
+.chatbot-form input {
+  flex: 1 1 420px;
+  min-width: 220px;
+}
+
+.chatbot-status {
+  min-height: 1.5em;
+}
+
+.chatbot-response {
+  margin-top: 12px;
+  padding: 16px;
+  border: 2px solid #4d5a66;
+  background: #ffffff;
+}
+
+.chatbot-response h3,
+.chatbot-response h4,
+.chatbot-response h5 {
+  margin-top: 0;
+}
+
+.chatbot-response.chatbot-success,
+.chatbot-response.chatbot-no_matches {
+  border-color: #28614d;
+  background: #f2faf5;
+}
+
+.chatbot-response.chatbot-invalid_question,
+.chatbot-response.chatbot-invalid_dates,
+.chatbot-response.chatbot-rejected_sql {
+  border-color: #9a5b00;
+  background: #fff7e6;
+}
+
+.chatbot-response.chatbot-configuration_error,
+.chatbot-response.chatbot-model_unavailable,
+.chatbot-response.chatbot-provider_authentication_error,
+.chatbot-response.chatbot-provider_rate_limited,
+.chatbot-response.chatbot-provider_error,
+.chatbot-response.chatbot-database_error,
+.chatbot-response.chatbot-network_error {
+  border-color: #8a2d1e;
+  background: #fff0eb;
+}
+
+.chatbot-final-answer {
+  font-weight: bold;
+}
+
+.chatbot-stay-details,
+.chatbot-stay-card {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #4d5a66;
+  background: #ffffff;
+}
+
+.chatbot-stay-details p,
+.chatbot-stay-card p {
+  margin: 8px 0;
+}
+
+.chatbot-stay-card ul {
+  margin-bottom: 0;
+  padding-left: 20px;
+}
+
 @media (max-width: 760px) {
   .nearby-layout {
     grid-template-columns: 1fr;
@@ -141,5 +226,9 @@ td {
 
   #nearby-hotels-map {
     height: 360px;
+  }
+
+  .chatbot-form input {
+    flex-basis: 100%;
   }
 }

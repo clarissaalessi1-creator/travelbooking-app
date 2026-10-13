@@ -20,6 +20,12 @@ const bookingMessage = ref('Select a traveler, then search for a hotel to book a
 const isBooking = ref(false);
 const isHistoryLoading = ref(false);
 
+const chatbotQuestion = ref('');
+const chatbotResponse = ref(null);
+const chatbotStatus = ref('idle');
+const chatbotMessage = ref('Ask about saved local hotels using two YYYY-MM-DD dates.');
+const isChatbotLoading = ref(false);
+
 const nearbyZipCode = ref('');
 const nearbyHotels = ref([]);
 const nearbyOutcome = ref('idle');
@@ -174,6 +180,92 @@ async function deleteBooking(bookingId) {
   } finally {
     isBooking.value = false;
   }
+}
+
+function chatbotMessageForResponse(data, fallbackMessage) {
+  if (data?.final_answer) {
+    return data.final_answer;
+  }
+  if (data?.error?.message) {
+    return data.error.message;
+  }
+  if (typeof data?.detail === 'string' && data.detail.trim()) {
+    return data.detail;
+  }
+  return fallbackMessage;
+}
+
+async function askHotelAssistant() {
+  if (isChatbotLoading.value) {
+    return;
+  }
+
+  const question = chatbotQuestion.value.trim();
+  if (!question) {
+    chatbotResponse.value = null;
+    chatbotStatus.value = 'invalid_question';
+    chatbotMessage.value = 'Enter a hotel question before sending it.';
+    return;
+  }
+
+  isChatbotLoading.value = true;
+  chatbotStatus.value = 'loading';
+  chatbotMessage.value = 'Checking saved classroom hotel data…';
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/chatbot`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question }),
+    });
+    const data = await response.json().catch(() => ({}));
+
+    chatbotResponse.value = data;
+    chatbotStatus.value = data.status || (response.ok ? 'success' : 'provider_error');
+    chatbotMessage.value = chatbotMessageForResponse(
+      data,
+      'The hotel assistant could not complete that question. Please try again.',
+    );
+  } catch (_) {
+    chatbotResponse.value = {
+      status: 'network_error',
+      question,
+      stay: null,
+      retrieved_records: [],
+      final_answer: null,
+      error: {
+        code: 'network_error',
+        message: 'The local chatbot service could not be reached. Check the backend and retry.',
+      },
+    };
+    chatbotStatus.value = 'network_error';
+    chatbotMessage.value = chatbotResponse.value.error.message;
+  } finally {
+    isChatbotLoading.value = false;
+  }
+}
+
+function chatbotStatusLabel(statusValue) {
+  const labels = {
+    success: 'Hotel AI Assistant answer',
+    no_matches: 'No matching saved hotels',
+    invalid_question: 'Question needed',
+    invalid_dates: 'Invalid dates',
+    rejected_sql: 'Request safely rejected',
+    configuration_error: 'Assistant configuration error',
+    model_unavailable: 'Assistant model unavailable',
+    provider_authentication_error: 'Assistant provider error',
+    provider_rate_limited: 'Assistant provider is busy',
+    provider_timeout: 'Assistant provider timed out',
+    provider_unavailable: 'Assistant provider unavailable',
+    provider_network_error: 'Assistant provider connection error',
+    provider_invalid_response: 'Assistant provider response error',
+    provider_reasoning_only_response: 'Assistant provider response error',
+    provider_error: 'Assistant provider error',
+    database_error: 'Local hotel data error',
+    network_error: 'Network error',
+  };
+  return labels[statusValue] || 'Hotel AI Assistant';
 }
 
 function buildNearbyPopup(hotel) {
@@ -615,6 +707,83 @@ onBeforeUnmount(() => {
         </div>
       </div>
       <p v-if="nearbyInventoryNotice" class="inventory-notice">{{ nearbyInventoryNotice }}</p>
+    </section>
+
+    <section class="chatbot-section" aria-labelledby="hotel-ai-assistant-heading">
+      <h2 id="hotel-ai-assistant-heading">Hotel AI Assistant</h2>
+      <p id="chatbot-help">
+        Ask about saved local hotels, simulated nightly prices, and room availability. Include a
+        check-in and checkout date in YYYY-MM-DD format, such as 2026-10-10 to 2026-10-12.
+      </p>
+      <form class="chatbot-form" novalidate @submit.prevent="askHotelAssistant">
+        <label for="chatbot-question">Hotel question</label>
+        <input
+          id="chatbot-question"
+          v-model="chatbotQuestion"
+          type="text"
+          autocomplete="off"
+          :disabled="isChatbotLoading"
+          aria-describedby="chatbot-help chatbot-status"
+          placeholder="Which saved hotel has rooms from 2026-10-10 to 2026-10-12?"
+        >
+        <button type="submit" :disabled="isChatbotLoading">
+          {{ isChatbotLoading ? 'Sending…' : 'Send' }}
+        </button>
+      </form>
+      <p id="chatbot-status" class="chatbot-status" aria-live="polite" :data-status="chatbotStatus">
+        {{ chatbotMessage }}
+      </p>
+
+      <div
+        v-if="chatbotResponse"
+        class="chatbot-response"
+        :class="`chatbot-${chatbotResponse.status}`"
+        :role="chatbotResponse.error ? 'alert' : 'status'"
+      >
+        <h3>{{ chatbotStatusLabel(chatbotResponse.status) }}</h3>
+        <p v-if="chatbotResponse.final_answer" class="chatbot-final-answer">
+          {{ chatbotResponse.final_answer }}
+        </p>
+        <p v-else-if="chatbotResponse.error">{{ chatbotResponse.error.message }}</p>
+
+        <div v-if="chatbotResponse.stay" class="chatbot-stay-details">
+          <p>
+            <strong>Requested stay:</strong>
+            {{ chatbotResponse.stay.check_in }} to {{ chatbotResponse.stay.check_out }}
+            ({{ chatbotResponse.stay.night_count }} night{{ chatbotResponse.stay.night_count === 1 ? '' : 's' }};
+            checkout is not charged).
+          </p>
+          <p class="simulated-data-note">{{ chatbotResponse.stay.data_notice }}</p>
+        </div>
+
+        <div v-if="chatbotResponse.complete_stays?.length" class="chatbot-results">
+          <h4>Matching saved hotel details</h4>
+          <article v-for="stay in chatbotResponse.complete_stays" :key="`${stay.hotel_name}-${stay.address}`" class="chatbot-stay-card">
+            <h5>{{ stay.hotel_name || 'Saved hotel name unavailable.' }}</h5>
+            <p v-if="stay.address">{{ stay.address }}</p>
+            <p>
+              <strong>Stay dates:</strong>
+              {{ chatbotResponse.stay.check_in }} to {{ chatbotResponse.stay.check_out }}
+              ({{ chatbotResponse.stay.night_count }} night{{ chatbotResponse.stay.night_count === 1 ? '' : 's' }}).
+            </p>
+            <p>
+              <strong>Total simulated classroom price:</strong>
+              {{ formatSimulatedRate(stay.total_rate_cents) }}
+            </p>
+            <p>
+              <strong>Simulated classroom availability:</strong>
+              {{ stay.minimum_rooms_available }} room{{ stay.minimum_rooms_available === 1 ? '' : 's' }} minimum across the stay.
+            </p>
+            <p class="simulated-data-note">Stored nightly rates and room availability are simulated classroom data.</p>
+            <ul aria-label="Stored simulated nightly price and room availability">
+              <li v-for="night in stay.nightly_records" :key="night.stay_date">
+                {{ night.stay_date }} — {{ formatSimulatedRate(night.nightly_rate_cents) }},
+                {{ night.rooms_available }} rooms available (simulated classroom data)
+              </li>
+            </ul>
+          </article>
+        </div>
+      </div>
     </section>
 
     <section aria-labelledby="history-heading">

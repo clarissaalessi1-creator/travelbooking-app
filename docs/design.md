@@ -138,3 +138,40 @@ The same expected/observed record is maintained in `docs/evidence-log.md`.
 Implemented: Vue/Vite frontend source, FastAPI search and booking CRUD routes, a SQLite schema, one-time CSV seeding, SQLite `hotel_id` join logic, plain table rendering, traveler selection, booking history, cancellation, test deletion, the ZIP-code Geoapify hotel-map feature, and the in-class saved-hotel Add, Retain, Remove, and Local-first Lookup benchmarks. The saved-hotel actions create five explicitly simulated classroom nights, reflect persisted status on a later live ZIP search, remove only the selected local save with its dependent nights, and return stored local data before any Geoapify fallback. Browser tests passed for create, refresh persistence, cancellation, deletion, restart persistence, initial map rendering/attribution, invalid-ZIP feedback, local-first saved data, and empty-local API fallback. Focused backend tests simulate provider empty, failure, authentication, rate-limit, saved-hotel persistence, cascade removal, local-first saved retrieval, local errors, and unrelated-record preservation outcomes without spending provider quota.
 
 Not yet implemented: authentication and payments. A non-empty local Geoapify key is required only for an empty-local live-provider fallback.
+
+## 10. Assignment 2 Part 2 chatbot — implemented backend and Vue interface
+
+The local hotel chatbot is implemented in FastAPI and Vue. The research and
+early mockup are recorded separately in
+[assignment2-chatbot-research.md](assignment2-chatbot-research.md) and
+[assignment2-chatbot-early-mockup.svg](assignment2-chatbot-early-mockup.svg).
+`POST /api/chatbot` uses the configured server-only OpenRouter NVIDIA Nemotron
+model for two stages: it requests one constrained SQL-proposal JSON object,
+then sends only approved local records and deterministic calculations to the
+grounded-answer stage. The answer stage requests an exact JSON `answer` object;
+because the selected free Nemotron endpoint does not enforce `response_format`,
+FastAPI also accepts a bounded plain-text fallback only after verifying every
+displayed date, currency amount, room count, and hotel-style name against the
+deterministic local results. It returns structured `status`, question, stay metadata,
+proposed SQL, retrieved records, final answer, and safe error information.
+Provider failures are classified without retaining provider bodies: unavailable
+HTTP 5xx responses, timeouts, rate limits, network failures, invalid provider
+payloads, authentication failures, and unavailable models remain distinct.
+
+The backend uses a dedicated `mode=ro` SQLite connection, `query_only`, a
+connection authorizer, table/column allowlists, parameter binding, a fixed
+25-row query limit, and a progress budget. It accepts exactly two ISO dates,
+treats checkout as exclusive, sums integer cents, and requires every requested
+night to have positive stored rooms before declaring a complete stay. It
+intentionally does not alter the existing
+Assignment 1 records, saved-hotel records, manually edited demo-night rates or
+room counts, ZIP/map behavior, Add to Local behavior, or Remove from Local
+behavior. Tests mock OpenRouter and run against temporary databases. The Vue
+section is labeled **Hotel AI Assistant** and sends a keyboard-submittable local
+`fetch()` request only to `POST /api/chatbot`; it never receives an API key or
+calls OpenRouter directly. It disables duplicate sends, announces loading and
+safe error states, and displays returned stay dates, totals, and availability
+with explicit simulated-classroom-data labels. The fixed JSON evidence artifact,
+expected-versus-observed verification log, final report, and local UI captures
+are now available. The only remaining non-code evidence item is an
+instructor-accessible screen recording, if required by the rubric.

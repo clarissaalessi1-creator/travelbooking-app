@@ -78,10 +78,11 @@ From the repository root:
 python3 -m venv backend/.venv
 source backend/.venv/bin/activate
 pip install -r backend/requirements.txt
-uvicorn main:app --app-dir backend --reload
+uvicorn main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload
 ```
 
 The FastAPI service runs at `http://127.0.0.1:8000`.
+Confirm it is ready with `curl http://127.0.0.1:8000/api/health`.
 
 ### Frontend
 
@@ -90,10 +91,11 @@ In a second terminal:
 ```sh
 cd frontend
 npm install
-npm run dev
+npm run dev -- --host 127.0.0.1 --port 5173
 ```
 
-Open the localhost URL printed by Vite, normally `http://localhost:5173`.
+Open `http://127.0.0.1:5173/`. The backend readiness check is
+`curl http://127.0.0.1:8000/api/health`.
 
 ## Manual verification
 

@@ -1,0 +1,37 @@
+{
+  "purpose": "Offline, fixed verification sample for the two-stage local-hotel chatbot.",
+  "question": "Which saved hotel has rooms from 2026-10-10 to 2026-10-12?",
+  "first_stage_expected_shape": {
+    "sql": "SELECT\n    saved_hotels.saved_hotel_id,\n    saved_hotels.hotel_name,\n    saved_hotels.address,\n    saved_hotels.searched_zip_code,\n    demo_hotel_nights.stay_date,\n    demo_hotel_nights.nightly_rate_cents,\n    demo_hotel_nights.rooms_available\nFROM saved_hotels\nJOIN demo_hotel_nights\n    ON demo_hotel_nights.saved_hotel_id = saved_hotels.saved_hotel_id\nWHERE demo_hotel_nights.stay_date >= ?\n  AND demo_hotel_nights.stay_date < ?\nORDER BY saved_hotels.saved_hotel_id, demo_hotel_nights.stay_date\nLIMIT 25",
+    "parameters": ["2026-10-10", "2026-10-12"]
+  },
+  "retrieved_records": [
+    {
+      "hotel_name": "Chatbot Test Hotel",
+      "stay_date": "2026-10-10",
+      "nightly_rate_cents": 12500,
+      "rooms_available": 7
+    },
+    {
+      "hotel_name": "Chatbot Test Hotel",
+      "stay_date": "2026-10-11",
+      "nightly_rate_cents": 10000,
+      "rooms_available": 20
+    }
+  ],
+  "expected_complete_stay": {
+    "check_in": "2026-10-10",
+    "check_out": "2026-10-12",
+    "night_count": 2,
+    "checkout_included": false,
+    "total_rate_cents": 22500,
+    "minimum_rooms_available": 7
+  },
+  "expected_grounded_answer_facts": [
+    "Chatbot Test Hotel",
+    "$225.00",
+    "2 nights",
+    "7 rooms",
+    "simulated classroom data"
+  ]
+}
