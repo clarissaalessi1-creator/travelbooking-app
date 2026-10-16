@@ -7,8 +7,7 @@
 - **Implementation commit:** [`41247b3`](https://github.com/clarissaalessi1-creator/travelbooking-app/commit/41247b3)
   — `Complete Assignment 2 Part 2 chatbot`.
 - **Report location:** `report.md` at the repository root.
-- **Demonstration:** no recording link is invented. See the required recording
-  checklist in [docs/evidence/demo-recording-checklist.md](docs/evidence/demo-recording-checklist.md).
+- **Demonstration video:** [Watch the recorded chatbot demonstration](https://drive.google.com/file/d/1nLhpcZo33Jo-GUJ0pDfV6f1AAzdKbwPk/view?usp=sharing).
 
 ## Project overview and objective
 
@@ -256,8 +255,7 @@ OPENROUTER_MODEL=nvidia/nemotron-3-ultra-550b-a55b:free
   inventory.
 - The current saved provider record lacks a hotel name. The UI preserves that
   fact instead of fabricating one.
-- No screen recording has been created or linked in this repository. The
-  checklist identifies the exact genuine sequence to record.
+- A screen recording of the demonstration is linked in the submission information above. The recording is hosted on Google Drive; viewer access should be checked before submission.
 
 ## AI-use disclosure
 
